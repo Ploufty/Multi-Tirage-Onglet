@@ -71,6 +71,7 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
 
 15. **Icône du bouton « Doigts »** : utiliser le dessin tel quel donnait un pavé blanc à 32 px. Remplacée par `assets/dice-hands/icon.png` (contour seul de la main 5, trait épaissi, généré par `prepare-hands.cjs`), appliquée en masque CSS avec la couleur du bouton, comme les deux autres icônes.
 16. **Mode nuit** : les contours des boutons n'avaient qu'un contraste de 1,37:1 (bordure de référence #33334a). Les commandes ont maintenant un contour #6e6e92 (≥ 3:1, WCAG 1.4.11) et un fond légèrement surélevé ; interrupteurs éteints et piste du curseur visibles. Contrôle ajouté dans l'outil de test.
+17. **Mode clair** : même défaut en moins marqué (1,25:1). Contours des commandes à #88889f (≥ 3:1 sur blanc et sur le fond gris), aussi pour la barre d'onglets, les interrupteurs éteints et la piste du curseur. L'outil de test vérifie les deux thèmes.
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 

@@ -9,11 +9,13 @@
 
 [hidden] { display: none !important; }
 
-/* Mode sombre : la bordure de référence (#33334a) n'a qu'un contraste de 1,4:1 avec les fonds,
-   les boutons disparaissent. Les commandes reçoivent une bordure à 3:1 minimum (WCAG 1.4.11)
-   et un fond légèrement surélevé. Le mode « contraste renforcé » garde ses propres couleurs. */
+/* Contours des commandes (boutons, onglets, champ, interrupteurs, curseur) : la bordure de
+   référence est trop pâle pour une commande (1,25:1 en clair, 1,4:1 en sombre). Ils reçoivent un
+   contraste de 3:1 minimum avec le fond (WCAG 1.4.11). En sombre, les boutons ont aussi un fond
+   légèrement surélevé. Le mode « contraste renforcé » garde ses propres couleurs. */
+:root { --control-border: #88889f; }
 [data-theme="dark"] { --control-border: #6e6e92; }
-[data-theme="dark"][data-contrast="high"] { --control-border: var(--border); }
+[data-contrast="high"] { --control-border: var(--border); }
 
 [data-theme="dark"] .pillBtn:not(.active),
 [data-theme="dark"] .btn-ghost,
@@ -21,17 +23,14 @@
     background: var(--surface-2);
 }
 
-[data-theme="dark"] .pillBtn:not(.active):not(:hover),
-[data-theme="dark"] .btn-ghost:not(:hover),
-[data-theme="dark"] .icon-btn:not(:hover),
-[data-theme="dark"] .tabBar,
-[data-theme="dark"] textarea:not(:focus) {
+.pillBtn:not(.active):not(:hover),
+.btn-ghost:not(:hover),
+.icon-btn:not(:hover),
+textarea:not(:focus) {
     border-color: var(--control-border);
 }
 
-[data-theme="dark"] .toggle input:not(:checked) + .toggle-slider { background: var(--control-border); }
-[data-theme="dark"] #durationRange::-webkit-slider-runnable-track { background: var(--control-border); }
-[data-theme="dark"] #durationRange::-moz-range-track { background: var(--control-border); }
+.toggle input:not(:checked) + .toggle-slider { background: var(--control-border); }
 
 button, input[type="range"] { touch-action: manipulation; }
 
@@ -115,7 +114,7 @@ main.container {
     gap: .25rem;
     padding: .25rem;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--control-border);
     border-radius: 999px;
     box-shadow: var(--shadow);
 }
@@ -303,8 +302,8 @@ main.container {
     cursor: pointer;
 }
 
-#durationRange::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: var(--border); }
-#durationRange::-moz-range-track { height: 6px; border-radius: 999px; background: var(--border); }
+#durationRange::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: var(--control-border); }
+#durationRange::-moz-range-track { height: 6px; border-radius: 999px; background: var(--control-border); }
 
 #durationRange::-webkit-slider-thumb {
     -webkit-appearance: none;

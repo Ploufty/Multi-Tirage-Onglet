@@ -35,7 +35,7 @@ Screenshots go to `/tmp/multi-tirage-shots/` (override with `SHOTS=/path`). **Op
 | command | what it checks |
 |---|---|
 | `code` | `node --check` on both scripts; eslint on `scripts/randomizer.js` (ES5 + browser globals, config next to the driver); every `getElementById` id exists in `index.html`; every local `href`/`src` and the 6 hand PNGs exist; `innerHTML` only receives internal markup (never names or file contents) |
-| `ui` | at 1366×768, touch + mouse: HTML in a name is shown as text; the remove-drawn option; history; windows-1252 `.txt` import keeps accents; tap followed by mouse click both register; `?` on dice before the first roll; rolls of 6 points / 2 digits / 4 hands stay inside the dice area; hand images load; Space launches the draw; `F` enters fullscreen with a button focused; no horizontal overflow; touch targets ≥ 44 px; Lancer visible without scrolling; dark theme with control outlines ≥ 3:1 contrast; no page errors |
+| `ui` | at 1366×768, touch + mouse: HTML in a name is shown as text; the remove-drawn option; history; windows-1252 `.txt` import keeps accents; tap followed by mouse click both register; `?` on dice before the first roll; rolls of 6 points / 2 digits / 4 hands stay inside the dice area; hand images load; Space launches the draw; `F` enters fullscreen with a button focused; no horizontal overflow; touch targets ≥ 44 px; Lancer visible without scrolling; control outlines ≥ 3:1 contrast in light and dark themes; no page errors |
 | `devices` | 13 emulated devices (iPhone SE/14/14 landscape, Pixel 7, Galaxy S9+, iPad Mini, iPad landscape, Galaxy Tab S4, whiteboards 1024×768 and 1920×1080, laptops 1280×720 and 1366×768, phone with text at 130 %): draws a long name, rolls 6 hand dice, checks overflow, dice fit, touch targets, errors, and that Lancer is **above the fold except on phones** (scrolling there is accepted). Prints die size and Lancer's bottom position |
 | `shot WxH [opts]` | one screenshot. Options: `--tab dice --style hands\|pips\|digits --count 1-6 --roll --dark --fullscreen --text130 --touch`. `--fullscreen` uses the app's CSS fallback (`.fakeFullscreen`) |
 | `all` | `code` + `ui` + `devices` |
@@ -105,8 +105,11 @@ python3 -m http.server 8765   # then open http://localhost:8765 ; Ctrl-C to stop
   (`background: currentColor`), not the hand image. At 32 px the drawing's 16 px stroke
   becomes 0.8 px and only the white fill shows, as a white block. The icon keeps the outline only,
   thickened (`ICON_STROKE` 0.05: at 0.085 the fingers merge).
-- **Dark mode: the reference `--border` (#33334a) has only 1.4:1 contrast.** `css/style.css`
-  gives controls `--control-border: #6e6e92` (≥ 3:1). The `ui` check measures it.
+- **The reference `--border` is too faint for controls** (1.25:1 in light, 1.4:1 in dark).
+  `css/style.css` gives controls `--control-border` (#88889f light, #6e6e92 dark, ≥ 3:1). The
+  `ui` check measures it in both themes. Component rules declared later with
+  `border: … var(--border)` override it, so use `var(--control-border)` in those rules directly
+  (the `.tabBar` rule does).
 - **The hands are white-filled with a black outline.** Don't add `filter: invert()` or
   `brightness(0)` on them (the old thin-line PNGs needed it): that would turn them into
   flat silhouettes.

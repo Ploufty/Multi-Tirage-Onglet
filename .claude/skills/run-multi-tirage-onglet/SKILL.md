@@ -53,6 +53,17 @@ Lint only:
 eslint -c .claude/skills/run-multi-tirage-onglet/eslint.config.mjs scripts/randomizer.js
 ```
 
+**New hand drawings uploaded** (`assets/dice-hands/1.png` … `6.png`): normalise them in place
+(crop, centre in 600×600 with a 6 % margin, even out stroke width, grey+alpha PNG), then run `all`:
+
+```bash
+NODE_PATH="$(npm root -g)" node .claude/skills/run-multi-tirage-onglet/prepare-hands.cjs
+# -> 6.png  content 1175x896 → scale 0.449, stroke 19px thickened +16px, 556 KB → 50 KB
+```
+
+Files already at 600×600 are skipped, so re-running is safe. Rules for the drawings are in
+`assets/dice-hands/README.md`.
+
 To add a check, extend `ui()` or `deviceMatrix()` in the driver. The `measure()` and
 `bottomFromTop()` helpers run inside the page.
 
@@ -86,6 +97,12 @@ python3 -m http.server 8765   # then open http://localhost:8765 ; Ctrl-C to stop
   `randomizer.js` must stay ES5 (enforced by eslint `ecmaVersion: 5`).
 - **The driver sets `reducedMotion: 'reduce'`.** The reference UI then disables animations,
   so rolls finish deterministically. Confetti is not rendered in the driver's screenshots.
+- **Never process the hand images twice.** A second pass resamples an already-resized
+  image by a fraction of a pixel and blurs it. `prepare-hands.cjs` skips 600×600 files. To
+  redo them, restore the originals from git first (see `assets/dice-hands/README.md`).
+- **The hands are white-filled with a black outline.** Don't add `filter: invert()` or
+  `brightness(0)` on them (the old thin-line PNGs needed it): that would turn them into
+  flat silhouettes.
 - **Don't stop a background server with `pkill -f "http.server"`.** It matched the
   agent's own shell (exit 144). The driver serves in-process and needs no cleanup.
 

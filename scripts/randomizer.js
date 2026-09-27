@@ -296,7 +296,18 @@
     function buildHandMarkup(value) {
         if (!value) { return ''; }
         var clamped = Math.min(6, Math.max(1, value));
-        return '<img class="handImg" src="assets/dice-hands/' + clamped + '.png" alt="' + clamped + '">';
+        return '<img class="handImg" src="assets/dice-hands/' + clamped + '.png" alt="' + clamped + '" width="600" height="600" draggable="false">';
+    }
+
+    // Load the six hands as soon as the style is chosen, so the first roll never shows empty dice.
+    var handsPreloaded = false;
+    function preloadHands() {
+        if (handsPreloaded) { return; }
+        handsPreloaded = true;
+        var n;
+        for (n = 1; n <= 6; n++) {
+            new Image().src = 'assets/dice-hands/' + n + '.png';
+        }
     }
 
     function buildFaceInner(value, style) {
@@ -452,6 +463,7 @@
 
     function setDiceStyle(style) {
         diceStyle = style;
+        if (style === 'hands') { preloadHands(); }
         var i, btn, isActive;
         for (i = 0; i < diceStyleButtons.length; i++) {
             btn = diceStyleButtons[i];

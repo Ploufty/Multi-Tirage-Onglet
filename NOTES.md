@@ -67,6 +67,8 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
 
 13. **Outil de vérification pour les agents** : `.claude/skills/run-multi-tirage-onglet/` (skill `/run-multi-tirage-onglet`). `driver.cjs` sert le site et vérifie code, UI/ergonomie et 13 appareils émulés (`NODE_PATH="$(npm root -g)" node .claude/skills/run-multi-tirage-onglet/driver.cjs all`). Il a trouvé deux régressions corrigées dans la foulée : la ligne « Total » et l'historique qui se remplit poussaient le bouton Lancer sous le bas de l'écran sur les portables (la ligne Total garde maintenant sa place, l'historique défile dans sa colonne, zone des dés un peu réduite sur écrans peu hauts).
 
+14. **Nouveaux dessins de mains** (fournis par l'utilisateur : PNG 1254 × 1254, mains remplies de blanc et cernées de noir, commit `ddd96b7`). Préparés par `.claude/skills/run-multi-tirage-onglet/prepare-hands.cjs` : 600 × 600, recadrés et centrés avec la même marge, trait du 6 épaissi pour égaler les autres, 2,9 Mo → 318 Ko. L'appli n'épaissit plus le trait en CSS ni n'inverse les couleurs de la petite icône ; les 6 images sont préchargées dès qu'on choisit le style Doigts. Consignes pour de futurs dessins : `assets/dice-hands/README.md`.
+
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
 - **Pas de persistance des images/sons entre sessions** pour les futurs onglets Images/Sons : réimport à chaque fois accepté, pas d'IndexedDB prévu.

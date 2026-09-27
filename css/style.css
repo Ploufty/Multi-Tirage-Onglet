@@ -400,10 +400,6 @@ main.container {
 
 .miniPipFace .pipGrid { width: 100%; height: 100%; }
 
-/* Petite main du bouton : trait épaissi, blanche sur fond actif, claire en mode sombre. */
-.miniHand .handImg { filter: drop-shadow(0 0 .5px #000) drop-shadow(0 0 .5px #000); }
-.pillBtn.active .miniHand .handImg,
-[data-theme="dark"] .miniHand .handImg { filter: brightness(0) invert(1) drop-shadow(0 0 .5px #fff) drop-shadow(0 0 .5px #fff); }
 
 /* ---------- Onglet Dés : résultat ---------- */
 
@@ -488,18 +484,17 @@ main.container {
 .pip-br { grid-area: br; }
 .pip-c { grid-area: c; }
 
-/* Les dessins de mains sont petits (~70 px) et au trait fin : on les agrandit dans la face
-   et on épaissit le trait avec des ombres portées nettes, proportionnelles à la taille du dé. */
-.dieFace .handImg {
-    width: 84%;
-    height: 84%;
+/* Mains : PNG 600×600 déjà cadrés avec une marge de 6 % (voir assets/dice-hands/README.md).
+   Remplies de blanc et cernées de noir, elles restent lisibles sur le bouton bleu et en mode sombre. */
+.handImg {
+    display: block;
     object-fit: contain;
-    filter:
-        drop-shadow(0 0 calc(var(--dieSize) * .006) #000)
-        drop-shadow(0 0 calc(var(--dieSize) * .006) #000);
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
-.miniHand .handImg { width: 100%; height: 100%; object-fit: contain; }
+.dieFace .handImg { width: 92%; height: 92%; }
+.miniHand .handImg { width: 100%; height: 100%; }
 
 /* La ligne Total garde sa place même masquée : rien ne saute au premier lancer
    et le bouton Lancer ne descend pas. */

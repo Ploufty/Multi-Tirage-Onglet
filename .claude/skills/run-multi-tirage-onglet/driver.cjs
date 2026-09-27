@@ -138,6 +138,16 @@ async function code() {
   const missing = refs.filter((r) => !fs.existsSync(path.join(ROOT, r)));
   report(!missing.length, `local files referenced exist (${refs.length})`, missing.join(', '));
 
+  // Hand images: square 600x600 (prepare-hands.cjs output) and light enough for school networks.
+  const hands = [1, 2, 3, 4, 5, 6].map((n) => {
+    const f = path.join(ROOT, `assets/dice-hands/${n}.png`);
+    const buf = fs.readFileSync(f);
+    return { n, w: buf.readUInt32BE(16), h: buf.readUInt32BE(20), kb: Math.round(buf.length / 1024) };
+  });
+  const badHands = hands.filter((i) => i.w !== 600 || i.h !== 600 || i.kb > 150);
+  report(!badHands.length, `hand images 600x600 and <= 150 KB (total ${hands.reduce((t, i) => t + i.kb, 0)} KB)`,
+    badHands.map((i) => `${i.n}.png ${i.w}x${i.h} ${i.kb} KB`).join(', ') + (badHands.length ? ' -> run prepare-hands.cjs' : ''));
+
   // User text (names, file contents) must never reach innerHTML; only the known markup builders may.
   const allowed = /innerHTML = ('';|buildFaceInner\(|buildPipMarkup\(|buildHandMarkup\()/;
   const risky = src.split('\n').map((l, i) => [i + 1, l.trim()]).filter(([, l]) => /\.innerHTML\s*=/.test(l) && !allowed.test(l));

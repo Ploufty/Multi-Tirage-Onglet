@@ -65,6 +65,8 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
 12. **Vérification multi-appareils** (émulation Chromium : iPhone SE/14, Pixel, Galaxy, iPad, Galaxy Tab, TBI 1024×768 et 1920×1080, portables 1280×720 et 1366×768, texte à 130 %) : aucun défilement horizontal, dés toujours contenus, aucune erreur. Correctif : sur les écrans peu hauts (≤ 56rem), titre compact pour que le bouton Lancer soit visible sans défiler. Dés en attente affichés avec un « ? ».
    - Navigateurs minimum : Safari/iPadOS 14.5, Chrome/Edge 84, Firefox 75 (limité par `outil.js` — `?.`, `??` — et le `gap` en flexbox). Les vieux iPad bloqués en iOS 12 ne sont pas pris en charge. Firefox et Safari n'ont pas été testés en vrai (seul Chromium est disponible dans l'environnement de test).
 
+13. **Outil de vérification pour les agents** : `.claude/skills/run-multi-tirage-onglet/` (skill `/run-multi-tirage-onglet`). `driver.cjs` sert le site et vérifie code, UI/ergonomie et 13 appareils émulés (`NODE_PATH="$(npm root -g)" node .claude/skills/run-multi-tirage-onglet/driver.cjs all`). Il a trouvé deux régressions corrigées dans la foulée : la ligne « Total » et l'historique qui se remplit poussaient le bouton Lancer sous le bas de l'écran sur les portables (la ligne Total garde maintenant sa place, l'historique défile dans sa colonne, zone des dés un peu réduite sur écrans peu hauts).
+
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
 - **Pas de persistance des images/sons entre sessions** pour les futurs onglets Images/Sons : réimport à chaque fois accepté, pas d'IndexedDB prévu.

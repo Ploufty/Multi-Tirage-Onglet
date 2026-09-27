@@ -38,6 +38,29 @@
     var diceTotal = document.getElementById('diceTotal');
     var diceTotalValue = document.getElementById('diceTotalValue');
 
+    var imageStage = document.getElementById('imageStage');
+    var imageStatusText = document.getElementById('imageStatusText');
+    var imageCaption = document.getElementById('imageCaption');
+    var imageResultCard = document.getElementById('imageResultCard');
+    var imageDrawButton = document.getElementById('imageDrawButton');
+    var imageDurationRange = document.getElementById('imageDurationRange');
+    var imageDurationValue = document.getElementById('imageDurationValue');
+    var imageCountBadge = document.getElementById('imageCountBadge');
+    var imageReport = document.getElementById('imageReport');
+    var imageThumbs = document.getElementById('imageThumbs');
+    var btnImageFolder = document.getElementById('btnImageFolder');
+    var btnImageFiles = document.getElementById('btnImageFiles');
+    var btnImageReset = document.getElementById('btnImageReset');
+    var btnImageClear = document.getElementById('btnImageClear');
+    var imageFolderInput = document.getElementById('imageFolderInput');
+    var imageFilesInput = document.getElementById('imageFilesInput');
+    var removeImageToggle = document.getElementById('removeImageToggle');
+    var showImageNameToggle = document.getElementById('showImageNameToggle');
+
+    var IMAGE_LIMIT = 300;
+    var THUMB_MAX = 480;
+    var IMAGE_EXTENSIONS = /\.(jpe?g|jfif|pjpeg|pjp|png|apng|gif|webp|avif|svg|bmp|ico|heic|heif|tiff?)$/i;
+
     var DICE_SIDES_OPTIONS = {
         pips: [2, 3, 4, 5, 6],
         hands: [2, 3, 4, 5, 6],
@@ -50,6 +73,11 @@
     var diceStyle = 'pips';
     var diceSidesValue = 6;
     var history = [];
+    var images = [];
+    var isImageRolling = false;
+    var isImageLoading = false;
+    var imageMode = 'empty'; // empty | idle | final
+    var lastImage = null;
 
     function bindAction(element, action) {
         var el = typeof element === 'string' ? document.querySelector(element) : element;
@@ -77,6 +105,9 @@
         }
         if (tabName === 'dice' && !isDiceRolling) {
             sizeDiceTiles(diceCount);
+        }
+        if (tabName === 'images' && !isImageRolling) {
+            renderImageStage();
         }
         try { localStorage.setItem('randomizer_active_tab', tabName); } catch (e) {}
     }
@@ -110,7 +141,12 @@
         btnFullscreen.querySelector('.iconCompress').hidden = !active;
         btnFullscreen.title = active ? 'Quitter le plein écran (F)' : 'Plein écran (F)';
         btnFullscreen.setAttribute('aria-label', btnFullscreen.title);
+        refreshSizes();
+    }
+
+    function refreshSizes() {
         if (!isDiceRolling) { sizeDiceTiles(diceCount); }
+        if (!isImageRolling && imageMode === 'idle') { renderImageStage(); }
     }
 
     function toggleFullscreen() {
@@ -136,9 +172,7 @@
 
     bindAction(btnFullscreen, toggleFullscreen);
     document.addEventListener('fullscreenchange', updateFullscreenIcon, false);
-    window.addEventListener('resize', function() {
-        if (!isDiceRolling) { sizeDiceTiles(diceCount); }
-    }, false);
+    window.addEventListener('resize', refreshSizes, false);
 
     // ---- Keyboard shortcuts ----
 
@@ -161,6 +195,8 @@
             e.preventDefault();
             if (activeTab === 'dice') {
                 startDiceRoll();
+            } else if (activeTab === 'images') {
+                startImageDraw();
             } else {
                 startDraw();
             }
@@ -529,6 +565,446 @@
         addHistoryEntry(label, 'dice');
     }
 
+    // ---- Images ----
+
+    // Images are held in memory only (object URLs): they must be chosen again after a reload.
+    function isImageCandidate(file) {
+        return /^image\//.test(file.type || '') || IMAGE_EXTENSIONS.test(file.name);
+    }
+
+    function fileExtension(name) {
+        var m = /\.([^.]+)$/.exec(name);
+        return m ? m[1].toLowerCase() : '';
+    }
+
+    function imageDisplayName(name) {
+        return name.replace(/\.[^.]+$/, '').replace(/_+/g, ' ').replace(/^\s+|\s+$/g, '') || name;
+    }
+
+    function rejectReason(name) {
+        var ext = fileExtension(name);
+        if (ext === 'heic' || ext === 'heif') { return 'photo iPhone HEIC, lisible seulement dans Safari : à convertir en JPG'; }
+        if (ext === 'tif' || ext === 'tiff') { return 'TIFF, lisible seulement dans Safari : à convertir en JPG ou PNG'; }
+        return 'fichier illisible ou format non pris en charge';
+    }
+
+    // Downscaled copy for the carousel: dozens of full-size phone photos would make it stutter.
+    function makeThumb(img, file, done) {
+        var w = img.naturalWidth;
+        var h = img.naturalHeight;
+        // SVG stays vector; images without intrinsic size cannot be drawn on a canvas.
+        if (!w || !h || /svg/i.test(file.type) || fileExtension(file.name) === 'svg') { done(null); return; }
+        var scale = Math.min(1, THUMB_MAX / Math.max(w, h));
+        if (scale === 1 && file.size < 300000) { done(null); return; }
+        try {
+            var canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(w * scale));
+            canvas.height = Math.max(1, Math.round(h * scale));
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            var type = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
+            canvas.toBlob(function(blob) {
+                done(blob ? URL.createObjectURL(blob) : null);
+            }, type, 0.85);
+        } catch (e) {
+            done(null);
+        }
+    }
+
+    function loadImageFile(file, done) {
+        var url = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function() {
+            var w = img.naturalWidth;
+            var h = img.naturalHeight;
+            makeThumb(img, file, function(thumbUrl) {
+                done({
+                    name: imageDisplayName(file.name),
+                    url: url,
+                    thumb: thumbUrl || url,
+                    ratio: w && h ? w / h : 1,
+                    drawn: false
+                });
+            });
+        };
+        img.onerror = function() {
+            URL.revokeObjectURL(url);
+            done(null);
+        };
+        img.src = url;
+    }
+
+    function releaseImages() {
+        var i;
+        for (i = 0; i < images.length; i++) {
+            if (images[i].thumb !== images[i].url) { URL.revokeObjectURL(images[i].thumb); }
+            URL.revokeObjectURL(images[i].url);
+        }
+        images = [];
+    }
+
+    function availableImages() {
+        var pool = [];
+        var i;
+        for (i = 0; i < images.length; i++) {
+            if (!images[i].drawn) { pool.push(images[i]); }
+        }
+        return pool;
+    }
+
+    function setImageButtonsDisabled(disabled) {
+        btnImageFolder.disabled = disabled;
+        btnImageFiles.disabled = disabled;
+        btnImageReset.disabled = disabled;
+        btnImageClear.disabled = disabled;
+        imageDrawButton.disabled = disabled;
+    }
+
+    function importImageFiles(fileList) {
+        if (isImageRolling || isImageLoading) { return; }
+        var files = Array.prototype.slice.call(fileList || []);
+        if (!files.length) { return; }
+        var candidates = [];
+        var ignored = 0;
+        var i;
+        for (i = 0; i < files.length; i++) {
+            // Hidden system files (.DS_Store, ._photo.jpg from macOS) are skipped.
+            if (files[i].name.charAt(0) !== '.' && isImageCandidate(files[i])) {
+                candidates.push(files[i]);
+            } else {
+                ignored++;
+            }
+        }
+        candidates.sort(function(a, b) {
+            return (a.webkitRelativePath || a.name).localeCompare(b.webkitRelativePath || b.name, 'fr', { numeric: true });
+        });
+        var overLimit = Math.max(0, candidates.length - IMAGE_LIMIT);
+        candidates = candidates.slice(0, IMAGE_LIMIT);
+
+        if (!candidates.length) {
+            showImageReport('alert-error', 'Aucune image trouvée' + (ignored ? ' (' + ignored + ' fichier' + (ignored > 1 ? 's' : '') + ' d’un autre type).' : '.'), []);
+            notify('Aucune image trouvée.', 'error');
+            return;
+        }
+
+        releaseImages();
+        isImageLoading = true;
+        setImageButtonsDisabled(true);
+        imageMode = 'empty';
+        renderImageStage();
+        imageCaption.hidden = true;
+
+        var total = candidates.length;
+        var loaded = new Array(total);
+        var rejected = [];
+        var next = 0;
+        var finished = 0;
+        imageStatusText.textContent = 'Chargement des images… 0 / ' + total;
+
+        function launch() {
+            if (next >= total) { return; }
+            var index = next++;
+            var file = candidates[index];
+            loadImageFile(file, function(entry) {
+                if (entry) {
+                    loaded[index] = entry;
+                } else {
+                    rejected.push({ name: file.name, reason: rejectReason(file.name) });
+                }
+                finished++;
+                imageStatusText.textContent = 'Chargement des images… ' + finished + ' / ' + total;
+                if (finished === total) {
+                    finishImport(loaded, rejected, ignored, overLimit);
+                } else {
+                    launch();
+                }
+            });
+        }
+        for (i = 0; i < 4; i++) { launch(); }
+    }
+
+    function finishImport(loaded, rejected, ignored, overLimit) {
+        var i;
+        images = [];
+        for (i = 0; i < loaded.length; i++) {
+            if (loaded[i]) { images.push(loaded[i]); }
+        }
+        isImageLoading = false;
+        setImageButtonsDisabled(false);
+
+        var lines = [];
+        if (ignored) { lines.push(ignored + ' fichier' + (ignored > 1 ? 's' : '') + ' d’un autre type ignoré' + (ignored > 1 ? 's' : '') + '.'); }
+        if (overLimit) { lines.push('Limite de ' + IMAGE_LIMIT + ' images atteinte : ' + overLimit + ' non chargée' + (overLimit > 1 ? 's' : '') + '.'); }
+        var head = images.length + ' image' + (images.length > 1 ? 's' : '') + ' prête' + (images.length > 1 ? 's' : '') + '.';
+        if (rejected.length) {
+            head += ' ' + rejected.length + ' écartée' + (rejected.length > 1 ? 's' : '') + ' :';
+        }
+        rejected.sort(function(a, b) { return a.name.localeCompare(b.name, 'fr', { numeric: true }); });
+        var details = [];
+        for (i = 0; i < rejected.length && i < 6; i++) {
+            details.push(rejected[i].name + ' — ' + rejected[i].reason);
+        }
+        if (rejected.length > 6) { details.push('… et ' + (rejected.length - 6) + ' autre(s).'); }
+        showImageReport(rejected.length || overLimit ? 'alert-warning' : 'alert-info', head, details, lines);
+
+        renderImageThumbs();
+        updateImageCount();
+        imageMode = images.length ? 'idle' : 'empty';
+        renderImageStage();
+        if (images.length) {
+            imageStatusText.textContent = 'Prêt pour le tirage.';
+            notify(images.length + ' image' + (images.length > 1 ? 's' : '') + ' chargée' + (images.length > 1 ? 's' : '') + '.', rejected.length ? 'info' : 'success');
+        } else {
+            imageStatusText.textContent = 'Aucune image lisible. Consulte les formats acceptés.';
+            notify('Aucune image lisible.', 'error');
+        }
+    }
+
+    function showImageReport(kind, head, details, lines) {
+        imageReport.className = 'alert importReport ' + kind;
+        imageReport.innerHTML = '';
+        var p = document.createElement('p');
+        p.textContent = head;
+        imageReport.appendChild(p);
+        var i, li;
+        if (details.length) {
+            var ul = document.createElement('ul');
+            for (i = 0; i < details.length; i++) {
+                li = document.createElement('li');
+                li.textContent = details[i];
+                ul.appendChild(li);
+            }
+            imageReport.appendChild(ul);
+        }
+        for (i = 0; lines && i < lines.length; i++) {
+            p = document.createElement('p');
+            p.textContent = lines[i];
+            imageReport.appendChild(p);
+        }
+        imageReport.hidden = false;
+    }
+
+    function renderImageThumbs() {
+        imageThumbs.innerHTML = '';
+        imageThumbs.hidden = !images.length;
+        var i, li, img;
+        for (i = 0; i < images.length; i++) {
+            li = document.createElement('li');
+            li.className = images[i].drawn ? 'drawn' : '';
+            li.title = images[i].name;
+            img = document.createElement('img');
+            img.src = images[i].thumb;
+            img.alt = images[i].name;
+            img.loading = 'lazy';
+            li.appendChild(img);
+            imageThumbs.appendChild(li);
+        }
+    }
+
+    function updateImageCount() {
+        var remaining = availableImages().length;
+        var total = images.length;
+        imageCountBadge.textContent = remaining === total
+            ? total + (total > 1 ? ' images' : ' image')
+            : remaining + ' / ' + total + ' images';
+    }
+
+    function updateImageDuration() {
+        imageDurationValue.textContent = imageDurationRange.value;
+    }
+
+    // Square tiles sized from the stage height, leaving neighbours visible on narrow screens.
+    function sizeImageStage() {
+        var w = imageStage.clientWidth;
+        var h = imageStage.clientHeight;
+        if (!w || !h) { return null; } // hidden tab: sized again when shown
+        var size = Math.floor(Math.min(h * 0.8, w * 0.55, 380));
+        var gap = Math.max(8, Math.round(size * 0.08));
+        imageStage.style.setProperty('--tileSize', size + 'px');
+        imageStage.style.setProperty('--tileGap', gap + 'px');
+        return { size: size, gap: gap, width: w };
+    }
+
+    function randomImageSequence(pool, length) {
+        var seq = [];
+        var i, pick;
+        for (i = 0; i < length; i++) {
+            pick = pool[Math.floor(Math.random() * pool.length)];
+            if (pool.length > 1 && i > 0 && pick === seq[i - 1]) {
+                pick = pool[(pool.indexOf(pick) + 1) % pool.length];
+            }
+            seq.push(pick);
+        }
+        return seq;
+    }
+
+    function buildImageStrip(sequence) {
+        var strip = document.createElement('div');
+        strip.className = 'imageStrip';
+        var i, tile, img;
+        for (i = 0; i < sequence.length; i++) {
+            tile = document.createElement('div');
+            tile.className = 'imageTile';
+            img = document.createElement('img');
+            img.src = sequence[i].thumb;
+            img.alt = '';
+            img.draggable = false;
+            tile.appendChild(img);
+            strip.appendChild(tile);
+        }
+        return strip;
+    }
+
+    function stripOffset(index, dims) {
+        return index * (dims.size + dims.gap) + dims.size / 2 - dims.width / 2;
+    }
+
+    function renderImageStage() {
+        imageStage.innerHTML = '';
+        imageStage.classList.remove('carousel');
+        if (imageMode === 'idle') {
+            var pool = availableImages();
+            var dims = sizeImageStage();
+            if (!dims || !pool.length) { return; }
+            var visible = Math.ceil(dims.width / (dims.size + dims.gap)) + 2;
+            var strip = buildImageStrip(randomImageSequence(pool, visible));
+            imageStage.classList.add('carousel');
+            imageStage.appendChild(strip);
+            strip.style.transform = 'translate3d(' + (-stripOffset(Math.floor(visible / 2), dims)) + 'px,0,0)';
+        } else if (imageMode === 'final' && lastImage) {
+            showFinalImage(lastImage, false);
+        }
+    }
+
+    function showFinalImage(entry, animate) {
+        imageStage.innerHTML = '';
+        imageStage.classList.remove('carousel');
+        var frame = document.createElement('div');
+        frame.className = 'imageFinal' + (animate ? ' winner' : '');
+        frame.style.aspectRatio = String(entry.ratio);
+        var img = document.createElement('img');
+        img.src = entry.url;
+        img.alt = entry.name;
+        frame.appendChild(img);
+        imageStage.appendChild(frame);
+        imageCaption.textContent = entry.name;
+        imageCaption.hidden = !showImageNameToggle.checked;
+    }
+
+    function startImageDraw() {
+        if (isImageRolling || isImageLoading) { return; }
+        if (!images.length) {
+            imageStatusText.textContent = 'Choisis d’abord un dossier d’images.';
+            return;
+        }
+        var pool = availableImages();
+        if (!pool.length) {
+            imageStatusText.textContent = 'Toutes les images ont été tirées. Clique sur « Réinitialiser ».';
+            return;
+        }
+
+        var winner = pool[Math.floor(Math.random() * pool.length)];
+        var reduced = document.documentElement.getAttribute('data-motion') === 'reduce';
+        var dims = sizeImageStage();
+        if (reduced || !dims) {
+            finishImageDraw(winner);
+            return;
+        }
+
+        isImageRolling = true;
+        setImageButtonsDisabled(true);
+        imageCaption.hidden = true;
+        imageStatusText.textContent = 'Tirage en cours…';
+
+        var duration = parseInt(imageDurationRange.value, 10) * 1000;
+        var half = Math.ceil(dims.width / (dims.size + dims.gap) / 2) + 1;
+        var winnerIndex = half + Math.round(duration / 1000 * 9);
+        var sequence = randomImageSequence(pool, winnerIndex + half + 1);
+        sequence[winnerIndex] = winner;
+        // Neighbours differ from the winner so the stop is unambiguous.
+        if (pool.length > 1) {
+            var others = pool.filter(function(p) { return p !== winner; });
+            if (sequence[winnerIndex - 1] === winner) { sequence[winnerIndex - 1] = others[0]; }
+            if (sequence[winnerIndex + 1] === winner) { sequence[winnerIndex + 1] = others[others.length - 1]; }
+        }
+
+        imageStage.innerHTML = '';
+        imageStage.classList.add('carousel');
+        var strip = buildImageStrip(sequence);
+        imageStage.appendChild(strip);
+
+        var from = stripOffset(half, dims);
+        var to = stripOffset(winnerIndex, dims);
+        var start = null;
+
+        function frame(now) {
+            if (start === null) { start = now; }
+            var progress = Math.min(1, (now - start) / duration);
+            var eased = 1 - Math.pow(1 - progress, 4);
+            strip.style.transform = 'translate3d(' + (-(from + (to - from) * eased)) + 'px,0,0)';
+            if (progress < 1) {
+                requestAnimationFrame(frame);
+                return;
+            }
+            strip.children[winnerIndex].classList.add('selected');
+            setTimeout(function() { finishImageDraw(winner); }, 550);
+        }
+        requestAnimationFrame(frame);
+    }
+
+    function finishImageDraw(winner) {
+        isImageRolling = false;
+        setImageButtonsDisabled(false);
+        lastImage = winner;
+        imageMode = 'final';
+        showFinalImage(winner, true);
+        imageStatusText.textContent = 'Image tirée';
+        if (confettiToggle.checked) {
+            launchConfetti(imageResultCard);
+        }
+        addHistoryEntry(winner.name, 'images');
+        if (removeImageToggle.checked) {
+            winner.drawn = true;
+            renderImageThumbs();
+            updateImageCount();
+        }
+    }
+
+    function resetImages() {
+        if (isImageRolling || isImageLoading) { return; }
+        var i;
+        for (i = 0; i < images.length; i++) { images[i].drawn = false; }
+        lastImage = null;
+        imageCaption.hidden = true;
+        imageMode = images.length ? 'idle' : 'empty';
+        renderImageThumbs();
+        updateImageCount();
+        renderImageStage();
+        imageStatusText.textContent = images.length ? 'Prêt pour le tirage.' : 'Choisis un dossier d’images pour commencer.';
+        notify(images.length ? 'Toutes les images sont remises en jeu.' : 'Rien à réinitialiser.', 'info');
+    }
+
+    function clearImages() {
+        if (isImageRolling || isImageLoading) { return; }
+        releaseImages();
+        lastImage = null;
+        imageMode = 'empty';
+        imageCaption.hidden = true;
+        imageReport.hidden = true;
+        renderImageThumbs();
+        updateImageCount();
+        renderImageStage();
+        imageStatusText.textContent = 'Choisis un dossier d’images pour commencer.';
+        notify('Images retirées.', 'info');
+    }
+
+    function persistImageOptions() {
+        try {
+            localStorage.setItem('randomizer_image_remove', removeImageToggle.checked ? '1' : '0');
+            localStorage.setItem('randomizer_image_show_name', showImageNameToggle.checked ? '1' : '0');
+            localStorage.setItem('randomizer_image_duration', imageDurationRange.value);
+        } catch (e) {}
+    }
+
     // ---- Shared: confetti ----
 
     function launchConfetti(anchorEl) {
@@ -636,13 +1112,36 @@
     function updateHistoryVisibility() {
         historyPanel.hidden = !showHistoryToggle.checked;
         layout.classList.toggle('noHistory', historyPanel.hidden);
-        if (!isDiceRolling) { sizeDiceTiles(diceCount); }
+        refreshSizes();
     }
 
     // ---- Wiring ----
 
     bindAction(drawButton, startDraw);
     bindAction(diceRollButton, startDiceRoll);
+    bindAction(imageDrawButton, startImageDraw);
+    bindAction(btnImageFolder, function() { imageFolderInput.click(); });
+    bindAction(btnImageFiles, function() { imageFilesInput.click(); });
+    bindAction(btnImageReset, resetImages);
+    bindAction(btnImageClear, clearImages);
+
+    imageFolderInput.addEventListener('change', function() {
+        importImageFiles(imageFolderInput.files);
+        imageFolderInput.value = '';
+    }, false);
+    imageFilesInput.addEventListener('change', function() {
+        importImageFiles(imageFilesInput.files);
+        imageFilesInput.value = '';
+    }, false);
+    imageDurationRange.addEventListener('input', function() {
+        updateImageDuration();
+        persistImageOptions();
+    }, false);
+    removeImageToggle.addEventListener('change', persistImageOptions, false);
+    showImageNameToggle.addEventListener('change', function() {
+        persistImageOptions();
+        if (imageMode === 'final' && !isImageRolling) { imageCaption.hidden = !showImageNameToggle.checked; }
+    }, false);
 
     for (var s = 0; s < diceStyleButtons.length; s++) {
         bindAction(diceStyleButtons[s], function() {
@@ -751,18 +1250,26 @@
         if (savedDiceSides) {
             diceSidesValue = savedDiceSides;
         }
+        removeImageToggle.checked = localStorage.getItem('randomizer_image_remove') === '1';
+        showImageNameToggle.checked = localStorage.getItem('randomizer_image_show_name') !== '0';
+        var savedImageDuration = parseInt(localStorage.getItem('randomizer_image_duration'), 10);
+        if (savedImageDuration >= 3 && savedImageDuration <= 7) {
+            imageDurationRange.value = savedImageDuration;
+        }
     } catch (e) {}
 
     var initialTab = 'names';
     try {
         var savedTab = localStorage.getItem('randomizer_active_tab');
-        if (savedTab === 'names' || savedTab === 'dice') {
+        if (savedTab === 'names' || savedTab === 'dice' || savedTab === 'images') {
             initialTab = savedTab;
         }
     } catch (e) {}
 
     updateCount();
     updateDuration();
+    updateImageDuration();
+    updateImageCount();
     updateHistoryVisibility();
     renderHistory();
     setDiceStyle(diceStyle);

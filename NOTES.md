@@ -62,6 +62,12 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Mise en page en grille adaptée à chaque écran : 3 colonnes (réglages / résultat / historique) sur ordinateur et TBI, 2 colonnes + historique en dessous sur tablette, 1 colonne sur téléphone. Largeur max 90rem pour profiter du TBI ; en plein écran, titre et pied de page masqués.
    - Dés : taille calculée pour occuper au mieux la zone de résultat (JS teste chaque nombre de dés par ligne et garde le plus grand ; ex. 4 dés → 2×2). De ~90 px (6 dés sur téléphone) à 300 px (1 dé sur TBI). Points agrandis (ils étaient plafonnés à 9 px).
    - Mains : les PNG fournis ne font que ~70 px, d'où un trait fin et flou une fois agrandis. Elles occupent maintenant 84 % de la face et le trait est épaissi par des ombres portées. Pour un rendu vraiment net, fournir des versions plus grandes (≥ 300 px).
+12. **Onglet Images** :
+   - Choix d'un dossier (`webkitdirectory`, sous-dossiers inclus) ou de fichiers multiples (repli pour iPad/iPhone). Images gardées en mémoire (URL d'objets), pas de persistance (décision ci-dessous). 300 images max.
+   - Chaque fichier est chargé pour vérifier qu'il s'affiche ; les illisibles (HEIC/TIFF hors Safari, fichiers abîmés) sont listés avec la raison dans un compte rendu. Miniatures réduites à 480 px pour que le carrousel reste fluide avec des photos de téléphone (SVG gardés tels quels).
+   - Animation : bande de tuiles qui défile et ralentit (easing), repères rouges au centre, la tuile tirée grossit puis l'image s'affiche en grand dans un cadre blanc au format de l'image (lisible en mode sombre, petites images agrandies), avec le nom du fichier en légende (masquable).
+   - Options : durée 3-7 s, retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
+   - Notice des formats acceptés dans l'onglet (bloc repliable) et dans le README.
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
@@ -73,15 +79,15 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
 ## État au moment de la migration
 
 - Branche de travail : `claude/multi-tirage-onglets` (contient tout l'historique ci-dessus à partir de l'étape 7).
-- Onglets fonctionnels : **Noms**, **Dés** (3 styles : Points, Chiffres, Doigts).
-- Onglets prévus mais **pas commencés** : **Images**, **Sons**.
+- Onglets fonctionnels : **Noms**, **Dés** (3 styles : Points, Chiffres, Doigts), **Images**.
+- Onglet prévu mais **pas commencé** : **Sons**.
 - Cette branche n'a pas encore été fusionnée dans `main`.
 
 ## Ce qu'il reste à faire (demandé par l'utilisateur)
 
 1. Revoir le graphisme général de l'appli (pas seulement les dés) — passe de cohérence visuelle globale à faire, périmètre exact à clarifier avec l'utilisateur au démarrage de la prochaine session.
 2. Harmoniser encore la taille/le visuel des dés (au-delà des ajustements déjà faits ci-dessus) — demander à l'utilisateur ce qui le gêne précisément avant de retoucher à l'aveugle.
-3. Construire les onglets **Images** (import multi-fichiers local, tirage aléatoire, affichage) et **Sons** (import de dossier via `webkitdirectory`, avec repli par sélection multiple de fichiers pour les navigateurs qui ne le supportent pas comme Safari ; lecture via `<audio>`).
+3. Construire l'onglet **Sons** (import de dossier via `webkitdirectory`, avec repli par sélection multiple de fichiers pour les navigateurs qui ne le supportent pas comme Safari ; lecture via `<audio>`).
 
 ## Suggestions pour la reprise (avis de l'assistant, pas des demandes de l'utilisateur)
 

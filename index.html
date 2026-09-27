@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randomizer - Tirage au sort</title>
+    <meta name="description" content="Tirage au sort de noms avec liste importable, durée réglable et confettis.">
+    <link rel="icon" href="icon.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app" aria-label="Randomizer de tirage au sort">
+        <div id="confettiLayer" aria-hidden="true"></div>
+        <div id="notifBanner" class="notifBanner" role="status" aria-live="polite"></div>
+
+        <header class="topbar">
+            <div class="brand">
+                <div class="logoDice" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+                <div>
+                    <h1>Randomizer</h1>
+                    <p>Tirage au sort tactile</p>
+                </div>
+            </div>
+            <div class="topActions" id="namesTopActions">
+                <button type="button" id="btnImport" class="softButton">Importer .txt</button>
+                <input type="file" id="fileImport" accept=".txt,.csv,text/plain" style="display:none">
+                <button type="button" id="btnClear" class="softButton danger">Vider</button>
+            </div>
+            <div class="topActions globalActions">
+                <button type="button" id="btnFullscreen" class="btnIcon" title="Plein écran (F)" aria-label="Activer le plein écran">
+                    <svg class="iconExpand" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg class="iconCompress" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M9 3v3a2 2 0 0 1-2 2H4m17 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M4 15h3a2 2 0 0 1 2 2v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <nav class="tabBar" role="tablist" aria-label="Type de tirage">
+            <button type="button" class="tabButton active" data-tab="names" role="tab" aria-selected="true">Noms</button>
+            <button type="button" class="tabButton" data-tab="dice" role="tab" aria-selected="false">Dés</button>
+        </nav>
+
+        <section class="optionsBar">
+            <label class="optionToggle" id="removeDrawnOption">
+                <input type="checkbox" id="removeDrawnToggle">
+                <span>Retirer le nom tiré de la liste</span>
+            </label>
+            <label class="optionToggle">
+                <input type="checkbox" id="showHistoryToggle" checked>
+                <span>Afficher l'historique</span>
+            </label>
+            <label class="optionToggle">
+                <input type="checkbox" id="confettiToggle" checked>
+                <span>Effets visuels (confettis)</span>
+            </label>
+        </section>
+
+        <main class="layout">
+            <div class="tabPanel" id="tabPanel-names">
+                <section class="panel listPanel">
+                    <div class="panelHeader">
+                        <h2>Liste</h2>
+                        <span id="countBadge">0 nom</span>
+                    </div>
+                    <textarea id="nameList" spellcheck="false" placeholder="Colle ou importe une liste ici :&#10;Alice&#10;Bilal&#10;Chloé&#10;Noah"></textarea>
+                    <p class="hint">Un nom par ligne. Les virgules et points-virgules fonctionnent aussi.</p>
+                </section>
+
+                <section class="panel drawPanel">
+                    <div id="resultCard">
+                        <div id="statusText" aria-live="polite">Ajoute une liste, puis lance le tirage.</div>
+                        <div id="resultName" aria-live="off">—</div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="speedBox">
+                            <div class="speedHeader">
+                                <label for="durationRange">Durée du tirage</label>
+                                <strong><span id="durationValue">5</span> s</strong>
+                            </div>
+                            <input id="durationRange" type="range" min="3" max="7" value="5" step="1">
+                            <div class="rangeLabels"><span>3 s</span><span>7 s</span></div>
+                        </div>
+
+                        <button type="button" id="drawButton" class="drawButton" aria-label="Lancer le tirage au sort">
+                            <span class="dieButton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                            <span>Lancer</span>
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="tabPanel" id="tabPanel-dice" hidden>
+                <section class="panel listPanel dicePanel">
+                    <div class="panelHeader">
+                        <h2>Dés</h2>
+                    </div>
+
+                    <div class="diceGroup">
+                        <span class="diceGroupLabel" id="diceStyleLabel">Sélectionner un dé</span>
+                        <div class="pillRow" role="group" aria-labelledby="diceStyleLabel">
+                            <button type="button" class="pillBtn iconPill active" data-style="pips" aria-label="Dé à points" aria-pressed="true">
+                                <span class="miniPipFace" data-value="5" aria-hidden="true"></span>
+                            </button>
+                            <button type="button" class="pillBtn iconPill" data-style="digits" aria-label="Dé à chiffres" aria-pressed="false">5</button>
+                            <button type="button" class="pillBtn iconPill" data-style="hands" aria-label="Dé à doigts" aria-pressed="false">
+                                <span class="miniHand" data-value="5" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="diceGroup">
+                        <span class="diceGroupLabel" id="diceCountLabel">Nombre de dé(s)</span>
+                        <div class="pillRow" id="diceCountRow" role="group" aria-labelledby="diceCountLabel"></div>
+                    </div>
+
+                    <div class="diceGroup">
+                        <span class="diceGroupLabel" id="diceSidesLabel">Valeur max</span>
+                        <div class="pillRow" id="diceSidesRow" role="group" aria-labelledby="diceSidesLabel"></div>
+                    </div>
+
+                    <p class="hint">Choisis le style, le nombre de dés et leur valeur max, puis lance.</p>
+                </section>
+
+                <section class="panel drawPanel">
+                    <div id="diceResultCard">
+                        <div id="diceStatusText" aria-live="polite">Prêt à lancer les dés.</div>
+                        <div id="diceFaces" class="diceFaces"></div>
+                        <div id="diceTotal" class="diceTotal" hidden>Total : <strong id="diceTotalValue">0</strong></div>
+                    </div>
+
+                    <div class="controls diceControls">
+                        <button type="button" id="diceRollButton" class="drawButton" aria-label="Lancer les dés">
+                            <span class="dieButton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                            <span>Lancer</span>
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="panel historyPanel" id="historyPanel">
+                <div class="panelHeader">
+                    <h2>Derniers tirages</h2>
+                    <button type="button" id="btnClearHistory" class="linkButton">Effacer</button>
+                </div>
+                <ol id="historyList" class="historyList">
+                    <li class="historyEmpty">Aucun tirage pour l'instant.</li>
+                </ol>
+            </aside>
+        </main>
+
+        <footer class="appFooter">
+            Un outil de la <a href="https://prim76.ac-normandie.fr/numerique" target="_blank" rel="noopener">Mission numérique 76</a> développé par Etienne Liaudet
+        </footer>
+    </div>
+
+    <script src="scripts/randomizer.js"></script>
+</body>
+</html>

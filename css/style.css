@@ -110,7 +110,7 @@ main.container {
 
 .tabBar {
     display: flex;
-    flex: 0 1 24rem;
+    flex: 0 1 30rem;
     gap: .25rem;
     padding: .25rem;
     background: var(--surface);
@@ -293,7 +293,7 @@ main.container {
 }
 
 /* Curseur : piste fine, pouce rond, zone tactile de 44 px. */
-#durationRange {
+.speedBox input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
@@ -302,10 +302,10 @@ main.container {
     cursor: pointer;
 }
 
-#durationRange::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: var(--control-border); }
-#durationRange::-moz-range-track { height: 6px; border-radius: 999px; background: var(--control-border); }
+.speedBox input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: var(--control-border); }
+.speedBox input[type="range"]::-moz-range-track { height: 6px; border-radius: 999px; background: var(--control-border); }
 
-#durationRange::-webkit-slider-thumb {
+.speedBox input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 1.4rem;
     height: 1.4rem;
@@ -316,7 +316,7 @@ main.container {
     box-shadow: var(--shadow);
 }
 
-#durationRange::-moz-range-thumb {
+.speedBox input[type="range"]::-moz-range-thumb {
     width: 1rem;
     height: 1rem;
     border-radius: 50%;
@@ -542,6 +542,149 @@ main.container {
     font-size: 1.4em;
 }
 
+/* ---------- Onglet Images : réglages ---------- */
+
+.importReport { margin: 0; }
+.importReport ul { margin: .35rem 0 0 1.1rem; overflow-wrap: anywhere; }
+.importReport p + p { margin-top: .25rem; }
+
+.imageThumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr));
+    gap: .4rem;
+    max-height: 12rem;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.imageThumbs li {
+    aspect-ratio: 1;
+    padding: 2px;
+    background: #fff; /* images transparentes lisibles, même en mode sombre */
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    overflow: hidden;
+}
+
+.imageThumbs img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.imageThumbs li.drawn { opacity: .3; }
+
+.formatNotice {
+    font-size: .9rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: .6rem;
+}
+
+.formatNotice summary {
+    min-height: 2.75rem;
+    padding: .6rem .9rem;
+    color: var(--blue);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.formatNotice dl,
+.formatNotice ul { padding: 0 .9rem .8rem; }
+.formatNotice ul { padding-left: 2rem; color: var(--muted); }
+.formatNotice li + li { margin-top: .25rem; }
+.formatNotice dt { font-weight: 700; }
+.formatNotice dt::before { content: "● "; }
+.formatNotice dt.ok::before { color: var(--green); }
+.formatNotice dt.warn::before { color: var(--orange); }
+.formatNotice dt.no::before { color: var(--red); }
+.formatNotice dd { margin: 0 0 .5rem 1.1rem; }
+.formatNotice code { font-size: .85em; }
+
+/* ---------- Onglet Images : carrousel et résultat ---------- */
+
+.imageStage {
+    --tileSize: 10rem;
+    --tileGap: .8rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: clamp(9rem, 40vh, 30rem);
+    overflow: hidden;
+}
+
+#app:fullscreen .imageStage,
+#app.fakeFullscreen .imageStage { height: clamp(12rem, 58vh, 60rem); }
+
+/* Bords estompés et repères rouges au centre : l'image sous les flèches est celle tirée. */
+.imageStage.carousel {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+}
+
+.imageStage.carousel::before,
+.imageStage.carousel::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    z-index: 2;
+    border: .8rem solid transparent;
+    transform: translateX(-50%);
+}
+
+.imageStage.carousel::before { top: calc(50% - var(--tileSize) / 2 - 1.3rem); border-top-color: var(--red); }
+.imageStage.carousel::after { bottom: calc(50% - var(--tileSize) / 2 - 1.3rem); border-bottom-color: var(--red); }
+
+.imageStrip {
+    position: absolute;
+    top: calc(50% - var(--tileSize) / 2);
+    left: 0;
+    display: flex;
+    gap: var(--tileGap);
+    will-change: transform;
+}
+
+.imageTile {
+    flex: none;
+    width: var(--tileSize);
+    height: var(--tileSize);
+    padding: calc(var(--tileSize) * .04);
+    background: #fff;
+    border: max(2px, calc(var(--tileSize) * .02)) solid var(--border);
+    border-radius: calc(var(--tileSize) * .1);
+    box-shadow: 0 calc(var(--tileSize) * .03) calc(var(--tileSize) * .08) rgba(0, 0, 60, .18);
+    transition: transform .35s var(--spring), border-color .2s;
+}
+
+.imageTile img,
+.imageFinal img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+}
+
+.imageTile.selected { border-color: var(--blue); transform: scale(1.1); }
+
+/* Résultat : cadre blanc au format de l'image, qui agrandit aussi les petites images. */
+.imageFinal {
+    height: 100%;
+    max-width: 100%;
+    padding: clamp(.3rem, 1vw, .75rem);
+    background: #fff;
+    border: 3px solid var(--blue);
+    border-radius: var(--radius);
+    box-shadow: 0 .4rem 1.2rem rgba(0, 0, 60, .22);
+}
+
+.imageFinal.winner { animation: popWinner .45s var(--spring); }
+
+.imageCaption {
+    max-width: 100%;
+    font-size: clamp(1.4rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
 /* ---------- Confettis ---------- */
 
 #confettiLayer {
@@ -597,10 +740,12 @@ main.container {
 }
 
 .historyList li[data-kind="dice"] { border-left-color: var(--orange); }
+.historyList li[data-kind="images"] { border-left-color: var(--red); }
 
 .historyList li:first-child:not(.historyEmpty) { border-color: var(--blue); border-left-width: 4px; }
 .historyList li:first-child[data-kind="names"] { border-left-color: var(--green); }
 .historyList li:first-child[data-kind="dice"] { border-left-color: var(--orange); }
+.historyList li:first-child[data-kind="images"] { border-left-color: var(--red); }
 
 .historyName {
     overflow: hidden;
@@ -646,11 +791,13 @@ main.container {
     .layout.noHistory { grid-template-columns: minmax(0, 1fr); }
     .toolbar { flex-direction: column; align-items: stretch; }
     .tabBar { flex-basis: auto; }
+    .tabButton { padding: 0 .5rem; }
     .optionsBar { justify-content: center; }
     .hero { padding-block: 1rem; }
     #nameList { min-height: 9rem; }
     .drawButton { flex: 1 1 100%; }
     .diceFaces { height: clamp(10rem, 72vw, 22rem); }
+    .imageStage { height: clamp(10rem, 72vw, 22rem); }
 }
 
 /* Écrans peu hauts (portable, TBI 1024×768, tablette couchée) : titre compact
@@ -660,6 +807,7 @@ main.container {
     .hero h1 { font-size: clamp(1.4rem, 3vw, 1.9rem); }
     .hero p { display: none; }
     .diceFaces { height: clamp(9rem, 30vh, 30rem); }
+    .imageStage { height: clamp(9rem, 30vh, 30rem); }
 }
 
 @media (max-width: 44rem) {
@@ -670,4 +818,5 @@ main.container {
 @media (max-height: 34rem) and (orientation: landscape) {
     .hero { display: none; }
     .diceFaces { height: clamp(8rem, 50vh, 16rem); }
+    .imageStage { height: clamp(8rem, 50vh, 16rem); }
 }

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tirage au sort</title>
-<meta name="description" content="Tirer au sort un nom dans une liste ou lancer des dés, sur tablette comme au tableau.">
+<meta name="description" content="Tirer au sort un nom dans une liste, lancer des dés ou tirer une image, sur tablette comme au tableau.">
 <meta name="theme-color" content="#000091">
 <link rel="icon" href="icon.png">
 
@@ -38,7 +38,7 @@
         </div>
         <div class="container hero">
             <h1>Tirage <span class="accent">au sort</span></h1>
-            <p>Tire un nom dans une liste ou lance des dés, sur tablette comme au tableau.</p>
+            <p>Tire un nom dans une liste, lance des dés ou tire une image, sur tablette comme au tableau.</p>
         </div>
         <div class="tricolore" aria-hidden="true"></div>
     </header>
@@ -48,6 +48,7 @@
             <nav class="tabBar" role="tablist" aria-label="Type de tirage">
                 <button type="button" class="tabButton active" data-tab="names" role="tab" aria-selected="true">Noms</button>
                 <button type="button" class="tabButton" data-tab="dice" role="tab" aria-selected="false">Dés</button>
+                <button type="button" class="tabButton" data-tab="images" role="tab" aria-selected="false">Images</button>
             </nav>
             <div class="optionsBar">
                 <label class="toggle-wrap">
@@ -145,6 +146,79 @@
                         <button type="button" id="diceRollButton" class="btn drawButton">
                             <span class="dieButton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
                             Lancer les dés
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="tabPanel" id="tabPanel-images" hidden>
+                <section class="card settingsPanel">
+                    <div class="panelHeader">
+                        <h2>Images</h2>
+                        <span id="imageCountBadge" class="badge">0 image</span>
+                    </div>
+                    <div class="btn-row">
+                        <button type="button" id="btnImageFolder" class="btn">Choisir un dossier</button>
+                        <button type="button" id="btnImageFiles" class="btn btn-ghost">Choisir des images</button>
+                    </div>
+                    <input type="file" id="imageFolderInput" webkitdirectory directory multiple hidden>
+                    <input type="file" id="imageFilesInput" accept="image/*,.heic,.heif,.avif,.webp,.svg,.bmp,.ico" multiple hidden>
+
+                    <div id="imageReport" class="alert importReport" role="status" hidden></div>
+                    <ul id="imageThumbs" class="imageThumbs" aria-label="Images chargées" hidden></ul>
+
+                    <label class="toggle-wrap">
+                        <span class="toggle"><input type="checkbox" id="removeImageToggle"><span class="toggle-slider"></span></span>
+                        Retirer l'image tirée
+                    </label>
+                    <label class="toggle-wrap">
+                        <span class="toggle"><input type="checkbox" id="showImageNameToggle" checked><span class="toggle-slider"></span></span>
+                        Afficher le nom de l'image
+                    </label>
+                    <div class="btn-row">
+                        <button type="button" id="btnImageReset" class="btn btn-ghost">Réinitialiser</button>
+                        <button type="button" id="btnImageClear" class="btn btn-ghost btnDanger">Vider</button>
+                    </div>
+
+                    <details class="formatNotice">
+                        <summary>Formats acceptés</summary>
+                        <dl>
+                            <dt class="ok">Partout</dt>
+                            <dd>JPG / JPEG, PNG, GIF, WebP, SVG, BMP, ICO</dd>
+                            <dt class="warn">Selon le navigateur</dt>
+                            <dd>AVIF (navigateurs récents)<br>HEIC / HEIF, photos d'iPhone (Safari seulement)<br>TIFF (Safari seulement)</dd>
+                            <dt class="no">Non pris en charge</dt>
+                            <dd>Photos RAW (CR2, NEF…), PSD, PDF, vidéos</dd>
+                        </dl>
+                        <ul>
+                            <li>Conseillé : JPG ou PNG, 400 px de côté ou plus.</li>
+                            <li>Sous-dossiers inclus, 300 images au plus. Les fichiers illisibles sont signalés et écartés.</li>
+                            <li>Légende = nom du fichier : <code>chat_noir.jpg</code> → « chat noir ».</li>
+                            <li>Rien n'est envoyé en ligne ; à rechoisir après un rechargement de la page.</li>
+                            <li>iPad / iPhone : utilise « Choisir des images ».</li>
+                        </ul>
+                    </details>
+                </section>
+
+                <section class="card drawPanel">
+                    <div id="imageResultCard" class="resultCard">
+                        <div id="imageStatusText" class="statusText" aria-live="polite">Choisis un dossier d'images pour commencer.</div>
+                        <div id="imageStage" class="imageStage"></div>
+                        <div id="imageCaption" class="imageCaption" aria-live="polite" hidden></div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="speedBox">
+                            <div class="speedHeader">
+                                <label for="imageDurationRange">Durée du tirage</label>
+                                <strong><span id="imageDurationValue">5</span> s</strong>
+                            </div>
+                            <input id="imageDurationRange" type="range" min="3" max="7" value="5" step="1">
+                            <div class="rangeLabels"><span>3 s</span><span>7 s</span></div>
+                        </div>
+                        <button type="button" id="imageDrawButton" class="btn drawButton">
+                            <span class="dieButton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                            Lancer
                         </button>
                     </div>
                 </section>

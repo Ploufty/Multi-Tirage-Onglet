@@ -1,6 +1,6 @@
 # Randomizer — Tirage au sort
 
-Application web statique de tirage au sort pour la classe, à plusieurs onglets : **Noms** (liste importable, historique, confettis) et **Dés** (styles Points / Chiffres / Doigts, 1 à 6 dés). D'autres onglets (Images, Sons) sont prévus.
+Application web statique de tirage au sort pour la classe, à plusieurs onglets : **Noms** (liste importable, historique, confettis), **Dés** (styles Points / Chiffres / Doigts, 1 à 6 dés) et **Images** (tirage d'une image d'un dossier, animation en carrousel). Un onglet Sons est prévu.
 
 Pour l'historique complet du projet, les décisions prises et ce qu'il reste à faire, voir [`NOTES.md`](./NOTES.md).
 
@@ -16,6 +16,25 @@ assets/dice-hands/1.png..6.png  Illustrations des dés "Doigts"
 icon.png                      Icône / favicon
 NOTES.md                      Mémoire du projet (historique, décisions, suite)
 ```
+
+## Onglet Images : notice des formats acceptés
+
+Choisir un dossier (bouton « Choisir un dossier ») ou plusieurs fichiers (« Choisir des images »), puis « Lancer » : les images défilent en carrousel et s'arrêtent sur l'image tirée, affichée en grand avec son nom.
+
+| Prise en charge | Formats |
+|---|---|
+| Tous les navigateurs | JPG / JPEG, PNG, GIF, WebP, SVG, BMP, ICO |
+| Selon le navigateur | AVIF (navigateurs récents) · HEIC / HEIF, photos d'iPhone (Safari seulement) · TIFF (Safari seulement) |
+| Non pris en charge | Photos RAW (CR2, NEF…), PSD, PDF, vidéos |
+
+- Formats conseillés : **JPG ou PNG**, au moins 400 px de côté. Les petites images sont agrandies (donc floues).
+- Les sous-dossiers sont inclus ; les fichiers qui ne sont pas des images et les fichiers cachés (`.DS_Store`…) sont ignorés. 300 images au maximum.
+- Chaque image est testée au chargement : un fichier illisible (format non pris en charge par le navigateur, fichier abîmé) est listé dans le compte rendu avec la raison, et écarté du tirage.
+- La légende est le nom du fichier sans l'extension, `_` remplacé par des espaces : `chat_noir.jpg` → « chat noir ». Elle peut être masquée (option « Afficher le nom de l'image »).
+- Photos d'iPhone en HEIC : les convertir en JPG, ou régler l'iPhone sur *Réglages → Appareil photo → Formats → Le plus compatible*.
+- Les images restent sur l'appareil (rien n'est envoyé) et ne sont pas conservées : il faut les rechoisir après un rechargement de la page.
+- Sur iPad et iPhone, le choix d'un dossier n'est pas possible : utiliser « Choisir des images ».
+- Options : durée du tirage (3 à 7 s), retirer l'image tirée (« Réinitialiser » remet toutes les images en jeu), historique partagé avec les autres onglets.
 
 ## Utiliser en local
 

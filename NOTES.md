@@ -72,6 +72,12 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
 15. **Icône du bouton « Doigts »** : utiliser le dessin tel quel donnait un pavé blanc à 32 px. Remplacée par `assets/dice-hands/icon.png` (contour seul de la main 5, trait épaissi, généré par `prepare-hands.cjs`), appliquée en masque CSS avec la couleur du bouton, comme les deux autres icônes.
 16. **Mode nuit** : les contours des boutons n'avaient qu'un contraste de 1,37:1 (bordure de référence #33334a). Les commandes ont maintenant un contour #6e6e92 (≥ 3:1, WCAG 1.4.11) et un fond légèrement surélevé ; interrupteurs éteints et piste du curseur visibles. Contrôle ajouté dans l'outil de test.
 17. **Mode clair** : même défaut en moins marqué (1,25:1). Contours des commandes à #88889f (≥ 3:1 sur blanc et sur le fond gris), aussi pour la barre d'onglets, les interrupteurs éteints et la piste du curseur. L'outil de test vérifie les deux thèmes.
+18. **Onglet Images** :
+   - Choix d'un dossier (`webkitdirectory`, sous-dossiers inclus) ou de fichiers multiples (repli pour iPad/iPhone). Images gardées en mémoire (URL d'objets), pas de persistance (décision ci-dessous). 300 images max.
+   - Chaque fichier est chargé pour vérifier qu'il s'affiche ; les illisibles (HEIC/TIFF hors Safari, fichiers abîmés) sont listés avec la raison dans un compte rendu. Miniatures réduites à 480 px pour que le carrousel reste fluide avec des photos de téléphone (SVG gardés tels quels).
+   - Animation : bande de tuiles qui défile et ralentit (easing), repères rouges au centre, la tuile tirée grossit puis l'image s'affiche en grand dans un cadre blanc au format de l'image (lisible en mode sombre, petites images agrandies), avec le nom du fichier en légende (masquable).
+   - Options : durée 3-7 s, retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
+   - Notice des formats acceptés dans l'onglet (bloc repliable) et dans le README.
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
@@ -83,15 +89,15 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
 ## État au moment de la migration
 
 - Branche de travail : `claude/multi-tirage-onglets` (contient tout l'historique ci-dessus à partir de l'étape 7).
-- Onglets fonctionnels : **Noms**, **Dés** (3 styles : Points, Chiffres, Doigts).
-- Onglets prévus mais **pas commencés** : **Images**, **Sons**.
+- Onglets fonctionnels : **Noms**, **Dés** (3 styles : Points, Chiffres, Doigts), **Images**.
+- Onglet prévu mais **pas commencé** : **Sons**.
 - Cette branche n'a pas encore été fusionnée dans `main`.
 
 ## Ce qu'il reste à faire (demandé par l'utilisateur)
 
 1. Revoir le graphisme général de l'appli (pas seulement les dés) — passe de cohérence visuelle globale à faire, périmètre exact à clarifier avec l'utilisateur au démarrage de la prochaine session.
 2. Harmoniser encore la taille/le visuel des dés (au-delà des ajustements déjà faits ci-dessus) — demander à l'utilisateur ce qui le gêne précisément avant de retoucher à l'aveugle.
-3. Construire les onglets **Images** (import multi-fichiers local, tirage aléatoire, affichage) et **Sons** (import de dossier via `webkitdirectory`, avec repli par sélection multiple de fichiers pour les navigateurs qui ne le supportent pas comme Safari ; lecture via `<audio>`).
+3. Construire l'onglet **Sons** (import de dossier via `webkitdirectory`, avec repli par sélection multiple de fichiers pour les navigateurs qui ne le supportent pas comme Safari ; lecture via `<audio>`).
 
 ## Suggestions pour la reprise (avis de l'assistant, pas des demandes de l'utilisateur)
 

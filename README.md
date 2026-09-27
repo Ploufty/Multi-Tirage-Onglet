@@ -8,7 +8,9 @@ Pour l'historique complet du projet, les décisions prises et ce qu'il reste à 
 
 ```
 index.html                    Page principale
-css/style.css                 Styles
+css/outil.css                 UI de référence Apps1D76 (copie à l'identique, ne pas modifier)
+scripts/outil.js              UI de référence Apps1D76 : thème clair/sombre, réglages partagés
+css/style.css                 Styles propres à l'outil (utilisent les variables de outil.css)
 scripts/randomizer.js         Logique de l'application
 assets/dice-hands/1.png..6.png  Illustrations des dés "Doigts"
 icon.png                      Icône / favicon

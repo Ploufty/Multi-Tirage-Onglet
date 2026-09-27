@@ -28,6 +28,7 @@
     var btnFullscreen = document.getElementById('btnFullscreen');
     var appEl = document.getElementById('app');
     var notifTimer = null;
+    var confettiTimer = null;
 
     var diceCountRow = document.getElementById('diceCountRow');
     var diceSidesRow = document.getElementById('diceSidesRow');
@@ -54,26 +55,11 @@
     function bindAction(element, action) {
         var el = typeof element === 'string' ? document.querySelector(element) : element;
         if (!el) { return; }
-        function handler(e) {
-            e = e || window.event;
-            if (e.type === 'keydown') {
-                var key = e.which || e.keyCode;
-                if (key !== 13 && key !== 32) { return; }
-            }
-            if (e.type === 'touchstart') {
-                el._touchDone = true;
-            } else if (e.type === 'click' && el._touchDone) {
-                el._touchDone = false;
-                if (e.preventDefault) { e.preventDefault(); }
-                return false;
-            }
-            if (e.preventDefault) { e.preventDefault(); }
+        // Native click covers mouse, touch and Enter/Space on buttons.
+        el.addEventListener('click', function(e) {
+            e.preventDefault();
             action.call(el, e);
-            return false;
-        }
-        el.addEventListener('click', handler, false);
-        el.addEventListener('touchstart', handler, false);
-        el.addEventListener('keydown', handler, false);
+        }, false);
     }
 
     // ---- Tabs ----
@@ -128,6 +114,7 @@
         btnFullscreen.querySelector('.iconCompress').hidden = !active;
         btnFullscreen.title = active ? 'Quitter le plein écran (F)' : 'Plein écran (F)';
         btnFullscreen.setAttribute('aria-label', btnFullscreen.title);
+        if (!isDiceRolling) { sizeDiceTiles(diceCount); }
     }
 
     function toggleFullscreen() {
@@ -153,6 +140,9 @@
 
     bindAction(btnFullscreen, toggleFullscreen);
     document.addEventListener('fullscreenchange', updateFullscreenIcon, false);
+    window.addEventListener('resize', function() {
+        if (!isDiceRolling) { sizeDiceTiles(diceCount); }
+    }, false);
 
     // ---- Keyboard shortcuts ----
 
@@ -165,9 +155,11 @@
             return;
         }
 
-        if (isTyping || tag === 'BUTTON') { return; }
+        if (isTyping) { return; }
 
         if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+            // A focused button handles Space/Enter itself.
+            if (tag === 'BUTTON' || tag === 'A') { return; }
             var activeTabBtn = document.querySelector('.tabButton.active');
             var activeTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'names';
             e.preventDefault();
@@ -217,12 +209,12 @@
 
     function updateCount() {
         var names = parseNames();
-        countBadge.innerHTML = names.length + (names.length > 1 ? ' noms' : ' nom');
+        countBadge.textContent = names.length + (names.length > 1 ? ' noms' : ' nom');
         try { localStorage.setItem('randomizer_names', nameList.value); } catch (e) {}
     }
 
     function updateDuration() {
-        durationValue.innerHTML = durationRange.value;
+        durationValue.textContent = durationRange.value;
     }
 
     function chooseRandom(names) {
@@ -234,15 +226,15 @@
         var names = parseNames();
         if (!names.length) {
             resultName.className = '';
-            resultName.innerHTML = '—';
-            statusText.innerHTML = 'Colle ou importe une liste avant de lancer.';
+            resultName.textContent = '—';
+            statusText.textContent = 'Colle ou importe une liste avant de lancer.';
             return;
         }
 
         isRolling = true;
         drawButton.disabled = true;
         resultName.className = 'rolling';
-        statusText.innerHTML = 'Tirage en cours…';
+        statusText.textContent = 'Tirage en cours…';
 
         var duration = parseInt(durationRange.value, 10) * 1000;
         var start = new Date().getTime();
@@ -256,7 +248,7 @@
                 finishDraw(finalName);
                 return;
             }
-            resultName.innerHTML = chooseRandom(names);
+            resultName.textContent = chooseRandom(names);
             var delay = 38 + Math.pow(progress, 2.4) * 190;
             setTimeout(tick, delay);
         }
@@ -264,9 +256,9 @@
     }
 
     function finishDraw(name) {
-        resultName.innerHTML = name;
+        resultName.textContent = name;
         resultName.className = 'winner';
-        statusText.innerHTML = 'Résultat du tirage';
+        statusText.textContent = 'Résultat du tirage';
         isRolling = false;
         drawButton.disabled = false;
         if (confettiToggle.checked) {
@@ -372,7 +364,7 @@
         }
         renderDiceFaces(values, false);
         diceTotal.hidden = true;
-        diceStatusText.innerHTML = 'Prêt à lancer les dés.';
+        diceStatusText.textContent = 'Prêt à lancer les dés.';
     }
 
     function rollValues(count, sides) {
@@ -476,7 +468,7 @@
         isDiceRolling = true;
         diceRollButton.disabled = true;
         diceTotal.hidden = true;
-        diceStatusText.innerHTML = 'Lancer en cours…';
+        diceStatusText.textContent = 'Lancer en cours…';
 
         var sides = diceSidesValue;
         var count = diceCount;
@@ -512,16 +504,15 @@
         diceRollButton.disabled = false;
 
         var total = 0;
-        var i;
         for (i = 0; i < values.length; i++) {
             total += values[i];
         }
 
         if (values.length > 1) {
             diceTotal.hidden = false;
-            diceTotalValue.innerHTML = total;
+            diceTotalValue.textContent = total;
         }
-        diceStatusText.innerHTML = 'Résultat du lancer';
+        diceStatusText.textContent = 'Résultat du lancer';
 
         if (confettiToggle.checked) {
             launchConfetti(document.getElementById('diceResultCard'));
@@ -573,7 +564,8 @@
             c.style.animationDelay = delay + 'ms';
             confettiLayer.appendChild(c);
         }
-        setTimeout(function() {
+        clearTimeout(confettiTimer);
+        confettiTimer = setTimeout(function() {
             confettiLayer.innerHTML = '';
         }, 2100);
     }
@@ -659,8 +651,8 @@
         if (isRolling) { return; }
         nameList.value = '';
         updateCount();
-        resultName.innerHTML = '—';
-        statusText.innerHTML = 'Ajoute une liste, puis lance le tirage.';
+        resultName.textContent = '—';
+        statusText.textContent = 'Ajoute une liste, puis lance le tirage.';
         try { localStorage.removeItem('randomizer_names'); } catch (e) {}
         notify('Liste vidée.', 'info');
     });
@@ -704,11 +696,20 @@
             var file = fileImport.files && fileImport.files[0];
             if (!file) { return; }
             var reader = new FileReader();
+            var encoding = 'UTF-8';
             reader.onload = function(evt) {
-                nameList.value = evt.target.result || '';
+                var text = evt.target.result || '';
+                // Files saved by Excel/Notepad on Windows are often Windows-1252:
+                // decoding them as UTF-8 yields U+FFFD in place of accented letters.
+                if (encoding === 'UTF-8' && text.indexOf('\uFFFD') !== -1) {
+                    encoding = 'windows-1252';
+                    reader.readAsText(file, encoding);
+                    return;
+                }
+                nameList.value = text;
                 updateCount();
-                statusText.innerHTML = 'Liste importée. Prêt pour le tirage.';
-                resultName.innerHTML = '—';
+                statusText.textContent = 'Liste importée. Prêt pour le tirage.';
+                resultName.textContent = '—';
                 notify('Liste importée avec succès.', 'success');
             };
             reader.readAsText(file, 'UTF-8');

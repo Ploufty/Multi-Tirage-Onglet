@@ -9,6 +9,29 @@
 
 [hidden] { display: none !important; }
 
+/* Contours des commandes (boutons, onglets, champ, interrupteurs, curseur) : la bordure de
+   référence est trop pâle pour une commande (1,25:1 en clair, 1,4:1 en sombre). Ils reçoivent un
+   contraste de 3:1 minimum avec le fond (WCAG 1.4.11). En sombre, les boutons ont aussi un fond
+   légèrement surélevé. Le mode « contraste renforcé » garde ses propres couleurs. */
+:root { --control-border: #88889f; }
+[data-theme="dark"] { --control-border: #6e6e92; }
+[data-contrast="high"] { --control-border: var(--border); }
+
+[data-theme="dark"] .pillBtn:not(.active),
+[data-theme="dark"] .btn-ghost,
+[data-theme="dark"] .icon-btn {
+    background: var(--surface-2);
+}
+
+.pillBtn:not(.active):not(:hover),
+.btn-ghost:not(:hover),
+.icon-btn:not(:hover),
+textarea:not(:focus) {
+    border-color: var(--control-border);
+}
+
+.toggle input:not(:checked) + .toggle-slider { background: var(--control-border); }
+
 button, input[type="range"] { touch-action: manipulation; }
 
 /* ---------- Conteneur principal (cible du plein écran) ---------- */
@@ -91,7 +114,7 @@ main.container {
     gap: .25rem;
     padding: .25rem;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--control-border);
     border-radius: 999px;
     box-shadow: var(--shadow);
 }
@@ -279,8 +302,8 @@ main.container {
     cursor: pointer;
 }
 
-#durationRange::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: var(--border); }
-#durationRange::-moz-range-track { height: 6px; border-radius: 999px; background: var(--border); }
+#durationRange::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: var(--control-border); }
+#durationRange::-moz-range-track { height: 6px; border-radius: 999px; background: var(--control-border); }
 
 #durationRange::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -400,10 +423,16 @@ main.container {
 
 .miniPipFace .pipGrid { width: 100%; height: 100%; }
 
-/* Petite main du bouton : trait épaissi, blanche sur fond actif, claire en mode sombre. */
-.miniHand .handImg { filter: drop-shadow(0 0 .5px #000) drop-shadow(0 0 .5px #000); }
-.pillBtn.active .miniHand .handImg,
-[data-theme="dark"] .miniHand .handImg { filter: brightness(0) invert(1) drop-shadow(0 0 .5px #fff) drop-shadow(0 0 .5px #fff); }
+/* Icône « Doigts » : contour seul (icon.png, généré par prepare-hands.cjs) utilisé comme pochoir,
+   rempli avec la couleur du texte du bouton, comme les points et le « 5 » à côté. */
+.miniHand {
+    width: 2.2rem;
+    height: 2.2rem;
+    background: currentColor;
+    -webkit-mask: url(../assets/dice-hands/icon.png) center / contain no-repeat;
+    mask: url(../assets/dice-hands/icon.png) center / contain no-repeat;
+}
+
 
 /* ---------- Onglet Dés : résultat ---------- */
 
@@ -416,7 +445,7 @@ main.container {
     justify-content: center;
     gap: clamp(.6rem, 2vw, 1.5rem);
     width: 100%;
-    height: clamp(9rem, 40vh, 30rem);
+    height: clamp(9rem, 33vh, 30rem);
     box-sizing: border-box;
 }
 
@@ -439,6 +468,9 @@ main.container {
     font-weight: 700;
     line-height: 1;
 }
+
+/* Avant le premier lancer : « ? » discret. */
+.dieFace.waiting { color: #b4b4c6; }
 
 .dieFace.rolling { animation: dieShake .3s ease-in-out infinite; }
 .dieFace.dropping { animation: dieDrop 550ms var(--spring) both; }
@@ -485,18 +517,20 @@ main.container {
 .pip-br { grid-area: br; }
 .pip-c { grid-area: c; }
 
-/* Les dessins de mains sont petits (~70 px) et au trait fin : on les agrandit dans la face
-   et on épaissit le trait avec des ombres portées nettes, proportionnelles à la taille du dé. */
-.dieFace .handImg {
-    width: 84%;
-    height: 84%;
+/* Mains : PNG 600×600 déjà cadrés avec une marge de 6 % (voir assets/dice-hands/README.md).
+   Remplies de blanc et cernées de noir, elles restent lisibles sur le bouton bleu et en mode sombre. */
+.handImg {
+    display: block;
     object-fit: contain;
-    filter:
-        drop-shadow(0 0 calc(var(--dieSize) * .006) #000)
-        drop-shadow(0 0 calc(var(--dieSize) * .006) #000);
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
-.miniHand .handImg { width: 100%; height: 100%; object-fit: contain; }
+.dieFace .handImg { width: 92%; height: 92%; }
+
+/* La ligne Total garde sa place même masquée : rien ne saute au premier lancer
+   et le bouton Lancer ne descend pas. */
+#diceTotal[hidden] { display: block !important; visibility: hidden; }
 
 .diceTotal {
     font-size: clamp(1.1rem, 2.2vw, 1.6rem);
@@ -589,6 +623,13 @@ main.container {
     border-left-color: var(--border);
 }
 
+/* 3 colonnes : l'historique suit la hauteur des autres cartes au lieu de l'imposer
+   (sinon, en se remplissant, il pousse le bouton Lancer hors de l'écran) et sa liste défile. */
+@media (min-width: 64.01rem) {
+    .historyPanel { height: 0; min-height: 100%; }
+    .historyList { min-height: 0; max-height: none; }
+}
+
 /* ---------- Écrans moyens : historique sous les deux colonnes ---------- */
 
 @media (max-width: 64rem) {
@@ -610,6 +651,19 @@ main.container {
     #nameList { min-height: 9rem; }
     .drawButton { flex: 1 1 100%; }
     .diceFaces { height: clamp(10rem, 72vw, 22rem); }
+}
+
+/* Écrans peu hauts (portable, TBI 1024×768, tablette couchée) : titre compact
+   pour que le bouton Lancer reste visible sans défiler. */
+@media (max-height: 56rem) and (min-width: 44.01rem) {
+    .hero { padding-block: .4rem .8rem; }
+    .hero h1 { font-size: clamp(1.4rem, 3vw, 1.9rem); }
+    .hero p { display: none; }
+    .diceFaces { height: clamp(9rem, 30vh, 30rem); }
+}
+
+@media (max-width: 44rem) {
+    .hero p { display: none; }
 }
 
 /* Paysage bas (tablette ou téléphone couché) : pas de grand titre. */

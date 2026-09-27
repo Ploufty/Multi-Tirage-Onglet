@@ -416,7 +416,7 @@ main.container {
     justify-content: center;
     gap: clamp(.6rem, 2vw, 1.5rem);
     width: 100%;
-    height: clamp(9rem, 40vh, 30rem);
+    height: clamp(9rem, 36vh, 30rem);
     box-sizing: border-box;
 }
 
@@ -439,6 +439,9 @@ main.container {
     font-weight: 700;
     line-height: 1;
 }
+
+/* Avant le premier lancer : « ? » discret. */
+.dieFace.waiting { color: #b4b4c6; }
 
 .dieFace.rolling { animation: dieShake .3s ease-in-out infinite; }
 .dieFace.dropping { animation: dieDrop 550ms var(--spring) both; }
@@ -610,6 +613,18 @@ main.container {
     #nameList { min-height: 9rem; }
     .drawButton { flex: 1 1 100%; }
     .diceFaces { height: clamp(10rem, 72vw, 22rem); }
+}
+
+/* Écrans peu hauts (portable, TBI 1024×768, tablette couchée) : titre compact
+   pour que le bouton Lancer reste visible sans défiler. */
+@media (max-height: 56rem) and (min-width: 44.01rem) {
+    .hero { padding-block: .4rem .8rem; }
+    .hero h1 { font-size: clamp(1.4rem, 3vw, 1.9rem); }
+    .hero p { display: none; }
+}
+
+@media (max-width: 44rem) {
+    .hero p { display: none; }
 }
 
 /* Paysage bas (tablette ou téléphone couché) : pas de grand titre. */

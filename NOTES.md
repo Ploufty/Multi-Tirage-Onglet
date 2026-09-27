@@ -62,6 +62,8 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Mise en page en grille adaptée à chaque écran : 3 colonnes (réglages / résultat / historique) sur ordinateur et TBI, 2 colonnes + historique en dessous sur tablette, 1 colonne sur téléphone. Largeur max 90rem pour profiter du TBI ; en plein écran, titre et pied de page masqués.
    - Dés : taille calculée pour occuper au mieux la zone de résultat (JS teste chaque nombre de dés par ligne et garde le plus grand ; ex. 4 dés → 2×2). De ~90 px (6 dés sur téléphone) à 300 px (1 dé sur TBI). Points agrandis (ils étaient plafonnés à 9 px).
    - Mains : les PNG fournis ne font que ~70 px, d'où un trait fin et flou une fois agrandis. Elles occupent maintenant 84 % de la face et le trait est épaissi par des ombres portées. Pour un rendu vraiment net, fournir des versions plus grandes (≥ 300 px).
+12. **Vérification multi-appareils** (émulation Chromium : iPhone SE/14, Pixel, Galaxy, iPad, Galaxy Tab, TBI 1024×768 et 1920×1080, portables 1280×720 et 1366×768, texte à 130 %) : aucun défilement horizontal, dés toujours contenus, aucune erreur. Correctif : sur les écrans peu hauts (≤ 56rem), titre compact pour que le bouton Lancer soit visible sans défiler. Dés en attente affichés avec un « ? ».
+   - Navigateurs minimum : Safari/iPadOS 14.5, Chrome/Edge 84, Firefox 75 (limité par `outil.js` — `?.`, `??` — et le `gap` en flexbox). Les vieux iPad bloqués en iOS 12 ne sont pas pris en charge. Firefox et Safari n'ont pas été testés en vrai (seul Chromium est disponible dans l'environnement de test).
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 

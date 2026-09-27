@@ -300,6 +300,7 @@
     }
 
     function buildFaceInner(value, style) {
+        if (value === '?') { return value; }
         if (style === 'pips') { return buildPipMarkup(value); }
         if (style === 'hands') { return buildHandMarkup(value); }
         return String(value);
@@ -362,13 +363,15 @@
 
     function renderDicePlaceholders(count) {
         sizeDiceTiles(count);
-        var placeholderValue = diceStyle === 'digits' ? '–' : 0;
         var values = [];
         var i;
         for (i = 0; i < count; i++) {
-            values.push(placeholderValue);
+            values.push('?');
         }
         renderDiceFaces(values, false);
+        for (i = 0; i < diceFaces.children.length; i++) {
+            diceFaces.children[i].classList.add('waiting');
+        }
         diceTotal.hidden = true;
         diceStatusText.textContent = 'Prêt à lancer les dés.';
     }

@@ -135,6 +135,8 @@ async function code() {
 
   const refs = [...html.matchAll(/(?:href|src)="([^"#:]+)"/g)].map((m) => m[1]);
   refs.push(...[1, 2, 3, 4, 5, 6].map((n) => `assets/dice-hands/${n}.png`));
+  const css = fs.readFileSync(path.join(ROOT, 'css/style.css'), 'utf8');
+  refs.push(...[...css.matchAll(/url\(([^)"':]+)\)/g)].map((m) => path.posix.normalize('css/' + m[1])));
   const missing = refs.filter((r) => !fs.existsSync(path.join(ROOT, r)));
   report(!missing.length, `local files referenced exist (${refs.length})`, missing.join(', '));
 
@@ -216,6 +218,16 @@ async function ui(base) {
   // Dark theme via the reference toggle.
   await page.click('#theme-toggle');
   report(await page.evaluate(() => document.documentElement.dataset.theme) === 'dark', 'theme toggle switches to dark');
+  // Control outlines must stay visible in dark mode: >= 3:1 against the surface behind (WCAG 1.4.11).
+  const weak = await page.evaluate(() => {
+    const lum = (c) => { const v = c.match(/\d+(\.\d+)?/g).slice(0, 3).map((x) => x / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+    const behind = (el) => { for (let e = el.parentElement; e; e = e.parentElement) { const b = getComputedStyle(e).backgroundColor; if (!/rgba\(.*, 0\)|transparent/.test(b)) return b; } return 'rgb(0,0,0)'; };
+    return [...document.querySelectorAll('.pillBtn:not(.active), .icon-btn, .tabBar')].filter((e) => e.getBoundingClientRect().width).map((e) => {
+      const a = lum(getComputedStyle(e).borderTopColor), b = lum(behind(e));
+      return { el: e.id || e.className, ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) };
+    }).filter((r) => r.ratio < 3).map((r) => `${r.el} ${r.ratio.toFixed(2)}:1`);
+  });
+  report(!weak.length, 'dark mode: control outlines >= 3:1 contrast', weak.join(', '));
   await page.screenshot({ path: `${SHOTS}/ui-dark.png` });
 
   report(!page.errors.length, 'no page errors', page.errors.join(' | '));

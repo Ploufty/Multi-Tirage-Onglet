@@ -9,6 +9,30 @@
 
 [hidden] { display: none !important; }
 
+/* Mode sombre : la bordure de référence (#33334a) n'a qu'un contraste de 1,4:1 avec les fonds,
+   les boutons disparaissent. Les commandes reçoivent une bordure à 3:1 minimum (WCAG 1.4.11)
+   et un fond légèrement surélevé. Le mode « contraste renforcé » garde ses propres couleurs. */
+[data-theme="dark"] { --control-border: #6e6e92; }
+[data-theme="dark"][data-contrast="high"] { --control-border: var(--border); }
+
+[data-theme="dark"] .pillBtn:not(.active),
+[data-theme="dark"] .btn-ghost,
+[data-theme="dark"] .icon-btn {
+    background: var(--surface-2);
+}
+
+[data-theme="dark"] .pillBtn:not(.active):not(:hover),
+[data-theme="dark"] .btn-ghost:not(:hover),
+[data-theme="dark"] .icon-btn:not(:hover),
+[data-theme="dark"] .tabBar,
+[data-theme="dark"] textarea:not(:focus) {
+    border-color: var(--control-border);
+}
+
+[data-theme="dark"] .toggle input:not(:checked) + .toggle-slider { background: var(--control-border); }
+[data-theme="dark"] #durationRange::-webkit-slider-runnable-track { background: var(--control-border); }
+[data-theme="dark"] #durationRange::-moz-range-track { background: var(--control-border); }
+
 button, input[type="range"] { touch-action: manipulation; }
 
 /* ---------- Conteneur principal (cible du plein écran) ---------- */
@@ -400,6 +424,16 @@ main.container {
 
 .miniPipFace .pipGrid { width: 100%; height: 100%; }
 
+/* Icône « Doigts » : contour seul (icon.png, généré par prepare-hands.cjs) utilisé comme pochoir,
+   rempli avec la couleur du texte du bouton, comme les points et le « 5 » à côté. */
+.miniHand {
+    width: 2.2rem;
+    height: 2.2rem;
+    background: currentColor;
+    -webkit-mask: url(../assets/dice-hands/icon.png) center / contain no-repeat;
+    mask: url(../assets/dice-hands/icon.png) center / contain no-repeat;
+}
+
 
 /* ---------- Onglet Dés : résultat ---------- */
 
@@ -494,7 +528,6 @@ main.container {
 }
 
 .dieFace .handImg { width: 92%; height: 92%; }
-.miniHand .handImg { width: 100%; height: 100%; }
 
 /* La ligne Total garde sa place même masquée : rien ne saute au premier lancer
    et le bouton Lancer ne descend pas. */

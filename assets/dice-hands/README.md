@@ -1,6 +1,7 @@
 # Images des dés « Doigts »
 
-Les 6 dessins de mains affichés par le style « Doigts » (valeurs 1 à 6).
+Les 6 dessins de mains affichés par le style « Doigts » (valeurs 1 à 6), et `icon.png`, la
+petite icône du bouton « Type de dé ».
 
 ## Fichiers attendus
 
@@ -34,6 +35,11 @@ Le script remplace chaque image par une version prête pour l'appli :
   paraissent à la même échelle ;
 - **trait uniformisé** : un dessin au trait plus fin que les autres est épaissi ;
 - **PNG niveaux de gris + transparence**, compression maximale : environ 50 à 60 Ko par image.
+
+Il (re)crée aussi **`icon.png`** à partir de la main 5 : contour seul (sans le remplissage
+blanc), trait épaissi pour rester net à 32 px. L'appli l'utilise comme pochoir coloré avec la
+couleur du bouton : foncée au repos, blanche quand le bouton est actif, claire en mode sombre.
+Utiliser directement le dessin donnerait un pavé blanc à cette taille.
 
 Il ignore les images déjà en 600 × 600 px, car les retraiter les rendrait floues. Les
 originaux restent disponibles dans l'historique Git, par exemple :

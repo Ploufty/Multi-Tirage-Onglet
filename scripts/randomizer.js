@@ -667,8 +667,6 @@
 
     var miniPipPreview = document.querySelector('.miniPipFace');
     if (miniPipPreview) { miniPipPreview.innerHTML = buildPipMarkup(5); }
-    var miniHandPreview = document.querySelector('.miniHand');
-    if (miniHandPreview) { miniHandPreview.innerHTML = buildHandMarkup(5); }
 
     bindAction(btnClear, function() {
         if (isRolling) { return; }

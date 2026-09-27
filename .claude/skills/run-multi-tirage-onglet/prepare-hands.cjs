@@ -9,6 +9,11 @@
 //
 //   NODE_PATH="$(npm root -g)" node .claude/skills/run-multi-tirage-onglet/prepare-hands.cjs
 //
+// It also (re)builds assets/dice-hands/icon.png, the small icon of the "Doigts" style button:
+// outline only (the white fill is dropped), strokes thickened to stay crisp at ~32 px. The app
+// uses it as a CSS mask filled with currentColor, so it follows the button colours like the
+// other two icons.
+//
 // Images already at SIZE×SIZE are skipped (re-processing would resample and blur them).
 // To redo them, restore the originals first, e.g. `git show <commit>:assets/dice-hands/1.png > assets/dice-hands/1.png`.
 
@@ -115,6 +120,43 @@ async function normalise({ dataUrl, SIZE, MARGIN, STROKE }) {
   return { rgba: Array.from(px), stroke, radius, box: `${bw}x${bh}`, scale: +scale.toFixed(3) };
 }
 
+const ICON = 128;          // icon.png side (shown at ~32 CSS px, sharp up to 4x density)
+const ICON_FROM = 5;       // open palm: the most recognisable hand
+const ICON_STROKE = 0.05;  // outline width as a fraction of ICON (≈ 1.8 px at 35 px, same weight as the pips)
+
+// Runs in the page: outline-only icon (alpha = ink), black, thickened, cropped and centred.
+async function makeIcon({ dataUrl, ICON, ICON_STROKE }) {
+  const img = new Image(); img.src = dataUrl; await img.decode();
+  const W = img.width, H = img.height;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const cx = c.getContext('2d'); cx.drawImage(img, 0, 0);
+  const d = cx.getImageData(0, 0, W, H).data;
+  const ink = cx.createImageData(W, H);
+  let minX = W, minY = H, maxX = -1, maxY = -1;
+  for (let k = 0; k < W * H; k++) {
+    const a = d[k * 4 + 3] * Math.max(0, Math.min(1, (200 - d[k * 4]) / 120)); // dark pixels only
+    ink.data[k * 4 + 3] = a;
+    if (a > 60) { const x = k % W, y = (k / W) | 0; if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  }
+  cx.clearRect(0, 0, W, H); cx.putImageData(ink, 0, 0);
+  const bw = maxX - minX + 1, bh = maxY - minY + 1;
+  const scale = (ICON * 0.94) / Math.max(bw, bh);
+  // Measure the source stroke, then widen to reach ICON_STROKE once scaled down.
+  const runs = [];
+  for (let y = minY; y <= maxY; y += 3) { let run = 0; for (let x = minX; x <= maxX + 1; x++) { if (x <= maxX && ink.data[(y * W + x) * 4 + 3] > 128) run++; else if (run) { runs.push(run); run = 0; } } }
+  runs.sort((a, b) => a - b);
+  const radius = Math.max(0, (ICON_STROKE * ICON / scale - (runs[runs.length >> 1] || 0)) / 2);
+  const fat = document.createElement('canvas'); fat.width = W; fat.height = H;
+  const fx = fat.getContext('2d');
+  for (let a = 0; a < 360; a += 8) for (const r of [radius, radius * 0.66, radius * 0.33, 0]) fx.drawImage(c, Math.cos(a * Math.PI / 180) * r, Math.sin(a * Math.PI / 180) * r);
+  const out = document.createElement('canvas'); out.width = ICON; out.height = ICON;
+  const ox = out.getContext('2d'); ox.imageSmoothingQuality = 'high';
+  // The widened outline grows by `radius` on every side: crop to that, fit in 96 % of the icon.
+  const cw = bw + 2 * radius, ch = bh + 2 * radius, fit = (ICON * 0.96) / Math.max(cw, ch);
+  ox.drawImage(fat, minX - radius, minY - radius, cw, ch, (ICON - cw * fit) / 2, (ICON - ch * fit) / 2, cw * fit, ch * fit);
+  return { rgba: Array.from(ox.getImageData(0, 0, ICON, ICON).data), radius: Math.round(radius) };
+}
+
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage();
@@ -129,5 +171,10 @@ async function normalise({ dataUrl, SIZE, MARGIN, STROKE }) {
     fs.writeFileSync(file, png);
     console.log(`${n}.png  content ${r.box} → scale ${r.scale}, stroke ${r.stroke}px${r.radius ? ` thickened +${2 * r.radius}px` : ''}, ${Math.round(before / 1024)} KB → ${Math.round(png.length / 1024)} KB`);
   }
+  const src = 'data:image/png;base64,' + fs.readFileSync(path.join(DIR, `${ICON_FROM}.png`)).toString('base64');
+  const icon = await page.evaluate(makeIcon, { dataUrl: src, ICON, ICON_STROKE });
+  const iconPng = encodePngGreyAlpha(ICON, ICON, Uint8ClampedArray.from(icon.rgba));
+  fs.writeFileSync(path.join(DIR, 'icon.png'), iconPng);
+  console.log(`icon.png  from ${ICON_FROM}.png, outline only, thickened +${2 * icon.radius}px, ${ICON}x${ICON}, ${Math.round(iconPng.length / 1024)} KB`);
   await browser.close();
 })();

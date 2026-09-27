@@ -15,11 +15,10 @@
     var btnClear = document.getElementById('btnClear');
     var confettiLayer = document.getElementById('confettiLayer');
     var removeDrawnToggle = document.getElementById('removeDrawnToggle');
-    var removeDrawnOption = document.getElementById('removeDrawnOption');
-    var namesTopActions = document.getElementById('namesTopActions');
     var showHistoryToggle = document.getElementById('showHistoryToggle');
     var confettiToggle = document.getElementById('confettiToggle');
     var historyPanel = document.getElementById('historyPanel');
+    var layout = document.getElementById('layout');
     var historyList = document.getElementById('historyList');
     var btnClearHistory = document.getElementById('btnClearHistory');
     var tabButtons = document.querySelectorAll('.tabButton');
@@ -76,10 +75,7 @@
             panel = tabPanels[i];
             panel.hidden = panel.id !== 'tabPanel-' + tabName;
         }
-        var isNames = tabName === 'names';
-        removeDrawnOption.hidden = !isNames;
-        namesTopActions.hidden = !isNames;
-        if (!isNames && !isDiceRolling) {
+        if (tabName === 'dice' && !isDiceRolling) {
             sizeDiceTiles(diceCount);
         }
         try { localStorage.setItem('randomizer_active_tab', tabName); } catch (e) {}
@@ -309,16 +305,26 @@
         return String(value);
     }
 
+    // Largest square tile that fits `count` dice in the dice area, trying every
+    // number of dice per row (e.g. 4 dice: one row on a wide screen, 2×2 on a phone).
     function sizeDiceTiles(count) {
-        var containerWidth = diceFaces.clientWidth || 300;
-        var containerHeight = diceFaces.clientHeight || 160;
-        var gap = 14;
-        var perRow = count;
-        var maxRows = Math.ceil(count / perRow);
-        var byWidth = (containerWidth - gap * (perRow - 1)) / perRow;
-        var byHeight = (containerHeight - gap * (maxRows - 1)) / maxRows;
-        var size = Math.max(56, Math.min(130, byWidth, byHeight));
+        var width = diceFaces.clientWidth;
+        var height = diceFaces.clientHeight;
+        if (!width || !height) { return; } // hidden tab: sized again when shown
+        var gap = parseFloat(getComputedStyle(diceFaces).columnGap) || 0;
+        var best = 0;
+        var bestPerRow = count;
+        var perRow, rows, size;
+        for (perRow = 1; perRow <= count; perRow++) {
+            rows = Math.ceil(count / perRow);
+            size = Math.min((width - gap * (perRow - 1)) / perRow, (height - gap * (rows - 1)) / rows);
+            if (size > best) { best = size; bestPerRow = perRow; }
+        }
+        size = Math.floor(Math.min(best, 300));
         diceFaces.style.setProperty('--dieSize', size + 'px');
+        // Side padding so the row wraps after exactly bestPerRow dice (2×2 rather than 3+1).
+        var line = bestPerRow * size + (bestPerRow - 1) * gap;
+        diceFaces.style.paddingLeft = diceFaces.style.paddingRight = Math.max(0, Math.floor((width - line) / 2) - 1) + 'px';
     }
 
     function renderDiceFaces(values, rolling) {
@@ -629,6 +635,8 @@
 
     function updateHistoryVisibility() {
         historyPanel.hidden = !showHistoryToggle.checked;
+        layout.classList.toggle('noHistory', historyPanel.hidden);
+        if (!isDiceRolling) { sizeDiceTiles(diceCount); }
     }
 
     // ---- Wiring ----

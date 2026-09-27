@@ -55,13 +55,20 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - **Plein écran** : bouton dédié + raccourci clavier `F`, utilise l'API Fullscreen native avec repli CSS (`fakeFullscreen`) si elle est refusée par le navigateur.
    - **Raccourcis clavier** : `Espace`/`Entrée` lance le tirage de l'onglet actif, `Échap` quitte le plein écran. Désactivés quand le focus est dans un champ de saisie (pour ne pas gêner la frappe dans la liste de noms).
    - **Bandeau de notification transitoire** (toast) pour les confirmations : import de liste réussi, liste vidée, historique effacé.
+10. **Revue de code** : noms affichés en texte (plus d'injection HTML), clics perdus sur écrans tactiles + souris (TBI) corrigés, raccourci `F` actif même après un clic sur un bouton, confettis non coupés en cas de lancers rapprochés, import des fichiers Windows (windows-1252) sans perte d'accents.
+11. **Passage à l'UI de référence Apps1D76** (demandé par l'utilisateur, remplace l'ancienne palette bleu `#2563eb`) :
+   - `css/outil.css` et `scripts/outil.js` = copies à l'identique des blocs `<style>`/`<script>` du fichier de référence (police Marianne, bleu `#000091` / rouge `#e1000f`, thème clair/sombre, réglages partagés `apps1d-prefs`). **Ne pas les modifier** ; si l'outil rejoint le dépôt Apps1D76, les remplacer par `../../accueil/outil.css` et `../../accueil/outil.js`.
+   - En-tête de référence (lien retour Apps1D76, boutons plein écran et thème, titre, bande tricolore), pied de page conservé avec le crédit de l'utilisateur.
+   - Mise en page en grille adaptée à chaque écran : 3 colonnes (réglages / résultat / historique) sur ordinateur et TBI, 2 colonnes + historique en dessous sur tablette, 1 colonne sur téléphone. Largeur max 90rem pour profiter du TBI ; en plein écran, titre et pied de page masqués.
+   - Dés : taille calculée pour occuper au mieux la zone de résultat (JS teste chaque nombre de dés par ligne et garde le plus grand ; ex. 4 dés → 2×2). De ~90 px (6 dés sur téléphone) à 300 px (1 dé sur TBI). Points agrandis (ils étaient plafonnés à 9 px).
+   - Mains : les PNG fournis ne font que ~70 px, d'où un trait fin et flou une fois agrandis. Elles occupent maintenant 84 % de la face et le trait est épaissi par des ombres portées. Pour un rendu vraiment net, fournir des versions plus grandes (≥ 300 px).
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
 - **Pas de persistance des images/sons entre sessions** pour les futurs onglets Images/Sons : réimport à chaque fois accepté, pas d'IndexedDB prévu.
 - **Pas d'import "depuis un dossier en ligne via manifeste"** pour Images/Sons : idée explicitement écartée par l'utilisateur.
 - **Pas de fonctionnalité d'impression de fiches** (contrairement au site de référence lutin-malin.fr) : explicitement écartée.
-- Toujours garder la **palette de couleurs propre à l'app** (bleu `#2563eb` / blanc) quand on s'inspire d'un autre site — ne jamais reprendre leurs couleurs.
+- L'app suit l'**UI de référence Apps1D76** (variables de `css/outil.css`) ; quand on s'inspire d'un autre site, ne jamais reprendre ses couleurs. (Remplace l'ancienne règle « palette bleu `#2563eb` », à la demande de l'utilisateur.)
 
 ## État au moment de la migration
 

@@ -332,10 +332,22 @@
     function buildHandMarkup(value) {
         if (!value) { return ''; }
         var clamped = Math.min(6, Math.max(1, value));
-        return '<img class="handImg" src="assets/dice-hands/' + clamped + '.png" alt="' + clamped + '">';
+        return '<img class="handImg" src="assets/dice-hands/' + clamped + '.png" alt="' + clamped + '" width="600" height="600" draggable="false">';
+    }
+
+    // Load the six hands as soon as the style is chosen, so the first roll never shows empty dice.
+    var handsPreloaded = false;
+    function preloadHands() {
+        if (handsPreloaded) { return; }
+        handsPreloaded = true;
+        var n;
+        for (n = 1; n <= 6; n++) {
+            new Image().src = 'assets/dice-hands/' + n + '.png';
+        }
     }
 
     function buildFaceInner(value, style) {
+        if (value === '?') { return value; }
         if (style === 'pips') { return buildPipMarkup(value); }
         if (style === 'hands') { return buildHandMarkup(value); }
         return String(value);
@@ -398,13 +410,15 @@
 
     function renderDicePlaceholders(count) {
         sizeDiceTiles(count);
-        var placeholderValue = diceStyle === 'digits' ? '–' : 0;
         var values = [];
         var i;
         for (i = 0; i < count; i++) {
-            values.push(placeholderValue);
+            values.push('?');
         }
         renderDiceFaces(values, false);
+        for (i = 0; i < diceFaces.children.length; i++) {
+            diceFaces.children[i].classList.add('waiting');
+        }
         diceTotal.hidden = true;
         diceStatusText.textContent = 'Prêt à lancer les dés.';
     }
@@ -485,6 +499,7 @@
 
     function setDiceStyle(style) {
         diceStyle = style;
+        if (style === 'hands') { preloadHands(); }
         var i, btn, isActive;
         for (i = 0; i < diceStyleButtons.length; i++) {
             btn = diceStyleButtons[i];
@@ -1151,8 +1166,6 @@
 
     var miniPipPreview = document.querySelector('.miniPipFace');
     if (miniPipPreview) { miniPipPreview.innerHTML = buildPipMarkup(5); }
-    var miniHandPreview = document.querySelector('.miniHand');
-    if (miniHandPreview) { miniHandPreview.innerHTML = buildHandMarkup(5); }
 
     bindAction(btnClear, function() {
         if (isRolling) { return; }

@@ -3,7 +3,7 @@
 // scripts/outil.js is the verbatim Apps1D76 reference UI: never lint-fix or edit it.
 const browser = Object.fromEntries([
   'window', 'document', 'localStorage', 'setTimeout', 'clearTimeout', 'FileReader',
-  'getComputedStyle', 'Event', 'Image', 'URL', 'requestAnimationFrame', 'console', 'Outil', 'JSON', 'Math', 'Date', 'String', 'parseInt', 'parseFloat',
+  'getComputedStyle', 'Event', 'Image', 'URL', 'requestAnimationFrame', 'cancelAnimationFrame', 'navigator', 'Uint8Array', 'console', 'Outil', 'JSON', 'Math', 'Date', 'String', 'parseInt', 'parseFloat',
 ].map((g) => [g, 'readonly']));
 
 export default [{

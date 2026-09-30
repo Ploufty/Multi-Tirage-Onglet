@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tirage au sort</title>
-<meta name="description" content="Tirer au sort un nom dans une liste, lancer des dés ou tirer une image, sur tablette comme au tableau.">
+<meta name="description" content="Tirer au sort un nom dans une liste, lancer des dés, tirer une image ou écouter des sons au hasard, sur tablette comme au tableau.">
 <meta name="theme-color" content="#000091">
 <link rel="icon" href="icon.png">
 
@@ -38,7 +38,7 @@
         </div>
         <div class="container hero">
             <h1>Tirage <span class="accent">au sort</span></h1>
-            <p>Tire un nom dans une liste, lance des dés ou tire une image, sur tablette comme au tableau.</p>
+            <p>Tire un nom dans une liste, lance des dés, tire une image ou fait écouter des sons, sur tablette comme au tableau.</p>
         </div>
         <div class="tricolore" aria-hidden="true"></div>
     </header>
@@ -49,6 +49,7 @@
                 <button type="button" class="tabButton active" data-tab="names" role="tab" aria-selected="true">Noms</button>
                 <button type="button" class="tabButton" data-tab="dice" role="tab" aria-selected="false">Dés</button>
                 <button type="button" class="tabButton" data-tab="images" role="tab" aria-selected="false">Images</button>
+                <button type="button" class="tabButton" data-tab="sounds" role="tab" aria-selected="false">Sons</button>
             </nav>
             <div class="optionsBar">
                 <label class="toggle-wrap">
@@ -221,6 +222,88 @@
                             Lancer
                         </button>
                     </div>
+                </section>
+            </div>
+
+            <div class="tabPanel" id="tabPanel-sounds" hidden>
+                <section class="card settingsPanel">
+                    <div class="panelHeader">
+                        <h2>Sons</h2>
+                        <span id="soundCountBadge" class="badge">0 son</span>
+                    </div>
+                    <div class="btn-row">
+                        <button type="button" id="btnSoundFolder" class="btn">Choisir un dossier</button>
+                        <button type="button" id="btnSoundFiles" class="btn btn-ghost">Choisir des sons</button>
+                    </div>
+                    <input type="file" id="soundFolderInput" webkitdirectory directory multiple hidden>
+                    <input type="file" id="soundFilesInput" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.oga,.opus,.flac,.weba" multiple hidden>
+
+                    <div id="soundReport" class="alert importReport" role="status" hidden></div>
+
+                    <label class="toggle-wrap">
+                        <span class="toggle"><input type="checkbox" id="showSoundNameToggle" checked><span class="toggle-slider"></span></span>
+                        Afficher le nom du son
+                    </label>
+                    <div class="btn-row">
+                        <button type="button" id="btnSoundShuffle" class="btn btn-ghost">Remélanger</button>
+                        <button type="button" id="btnSoundClear" class="btn btn-ghost btnDanger">Vider</button>
+                    </div>
+
+                    <details class="formatNotice">
+                        <summary>Mode d'emploi</summary>
+                        <ol>
+                            <li>Choisis un dossier de sons (ou plusieurs fichiers) : ils sont mélangés au hasard.</li>
+                            <li>« Écouter » lance le son en cours ; pendant la lecture, le bouton met en pause puis reprend. Une fois le son terminé, « Réécouter » le rejoue.</li>
+                            <li>« Son suivant » et « Son précédent » parcourent le tirage. La barre du bas montre où tu en es : clique sur une case pour y aller.</li>
+                            <li>Décoche « Afficher le nom du son » pour faire deviner le bruit aux élèves.</li>
+                            <li>« Remélanger » refait un nouvel ordre et repart du début.</li>
+                        </ol>
+                        <p class="noticeKeys">Clavier : Espace = écouter / pause, ← → = son précédent / suivant.</p>
+                    </details>
+
+                    <details class="formatNotice">
+                        <summary>Formats acceptés</summary>
+                        <dl>
+                            <dt class="ok">Partout</dt>
+                            <dd>MP3, WAV, M4A / AAC</dd>
+                            <dt class="warn">Selon le navigateur</dt>
+                            <dd>OGG, OPUS, WEBM (pas sur les anciens iPad / iPhone)<br>FLAC (navigateurs récents)</dd>
+                            <dt class="no">Non pris en charge</dt>
+                            <dd>WMA, MIDI, AIFF (hors Safari), vidéos</dd>
+                        </dl>
+                        <ul>
+                            <li>Conseillé : MP3.</li>
+                            <li>Sous-dossiers inclus, 200 sons au plus. Les fichiers illisibles sont signalés et écartés.</li>
+                            <li>Nom affiché = nom du fichier : <code>des_applaudissements.mp3</code> → « des applaudissements ».</li>
+                            <li>Rien n'est envoyé en ligne ; à rechoisir après un rechargement de la page.</li>
+                            <li>iPad / iPhone : utilise « Choisir des sons ».</li>
+                        </ul>
+                    </details>
+                </section>
+
+                <section class="card drawPanel">
+                    <div id="soundResultCard" class="resultCard soundCard">
+                        <div id="soundSpeaker" class="soundSpeaker" aria-hidden="true">
+                            <svg viewBox="0 0 64 64">
+                                <path class="speakerBody" d="M8 24h10l14-12v40L18 40H8z"/>
+                                <path class="speakerWave w1" d="M39 25a10 10 0 0 1 0 14"/>
+                                <path class="speakerWave w2" d="M44 19a18 18 0 0 1 0 26"/>
+                                <path class="speakerWave w3" d="M49 13a26 26 0 0 1 0 38"/>
+                            </svg>
+                        </div>
+                        <h2 class="soundTitle">Tirage des sons</h2>
+                        <div id="soundStatusText" class="statusText" aria-live="polite">Choisis un dossier de sons pour commencer.</div>
+                        <div id="soundName" class="soundName" aria-live="polite" hidden></div>
+                        <button type="button" id="soundPlayButton" class="btn drawButton soundPlayButton">Écouter le son</button>
+                    </div>
+
+                    <div class="soundNav">
+                        <button type="button" id="soundPrevButton" class="btn btn-ghost">Son précédent</button>
+                        <span id="soundCounter" class="soundCounter">0 / 0</span>
+                        <button type="button" id="soundNextButton" class="btn btn-ghost">Son suivant</button>
+                    </div>
+                    <ol id="soundProgress" class="soundProgress" aria-label="Sons du tirage" hidden></ol>
+                    <audio id="soundAudio" preload="auto"></audio>
                 </section>
             </div>
 

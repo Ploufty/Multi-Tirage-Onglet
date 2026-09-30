@@ -2,7 +2,7 @@
 
 Ce fichier sert de mémoire persistante du projet, pensé pour survivre à une migration vers un nouveau repo (par exemple via export ZIP, qui ne conserve pas l'historique Git). Il résume tout le travail effectué depuis le début, les décisions prises et ce qui reste à faire. À la reprise du travail — nouveau repo ou nouvelle session — commencer par lire ce fichier en entier.
 
-Dernière mise à jour : 27/09/2026.
+Dernière mise à jour : 30/09/2026.
 
 ## Ce qu'est le projet
 
@@ -78,6 +78,13 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Animation : bande de tuiles qui défile et ralentit (easing), repères rouges au centre, la tuile tirée grossit puis l'image s'affiche en grand dans un cadre blanc au format de l'image (lisible en mode sombre, petites images agrandies), avec le nom du fichier en légende (masquable).
    - Options : durée 3-7 s, retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
    - Notice des formats acceptés dans l'onglet (bloc repliable) et dans le README.
+19. **Onglet Sons** (maquette fournie par l'utilisateur : capture d'un manuel numérique « Reconnaissons les bruits familiers » ; seul le principe est repris, ni le code WinJS/Pubreader, ni le caméléon de l'éditeur) :
+   - Import d'un dossier ou de fichiers (200 sons max). Chaque son est testé (métadonnées lues) ; WMA, MIDI, AIFF hors Safari et fichiers abîmés sont listés avec la raison. Sur iPad/iPhone, pas de préchargement possible sans geste : on s'appuie sur `canPlayType`.
+   - Les sons sont **mélangés une fois à l'import** (Fisher-Yates), puis parcourus dans cet ordre : « Son précédent » / « Son suivant », compteur « 3 / 12 », barre d'une case par son (courant en bleu, écoutés cochés en vert, clic pour y aller ; cases sans numéro au-delà de 24 sons). « Remélanger » refait un ordre et repart du début.
+   - Bouton principal : « Écouter le son » → « Pause » pendant la lecture → « Reprendre l'écoute » → « Réécouter » une fois le son fini.
+   - Titre « Tirage des sons » avec un **haut-parleur** dont les ondes suivent le volume réel (Web Audio `AnalyserNode`). Décision de l'utilisateur : **pas d'icône propre à chaque bruit**, juste le haut-parleur. Sur iPad/iPhone, pas d'analyse (router l'audio par Web Audio le couperait avec le bouton silencieux) : les ondes pulsent simplement.
+   - Option « Afficher le nom du son » (décochée = jeu de devinette). Le son entre dans l'historique (liseré bleu) à sa première écoute. Clavier : Espace = écouter/pause, ← → = précédent/suivant. Le son s'arrête quand on change d'onglet.
+   - Notices repliables dans l'onglet : « Mode d'emploi » et « Formats acceptés » (aussi dans le README).
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
@@ -89,15 +96,13 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
 ## État au moment de la migration
 
 - Branche de travail : `claude/multi-tirage-onglets` (contient tout l'historique ci-dessus à partir de l'étape 7).
-- Onglets fonctionnels : **Noms**, **Dés** (3 styles : Points, Chiffres, Doigts), **Images**.
-- Onglet prévu mais **pas commencé** : **Sons**.
+- Onglets fonctionnels : **Noms**, **Dés** (3 styles : Points, Chiffres, Doigts), **Images**, **Sons**.
 - Cette branche n'a pas encore été fusionnée dans `main`.
 
 ## Ce qu'il reste à faire (demandé par l'utilisateur)
 
 1. Revoir le graphisme général de l'appli (pas seulement les dés) — passe de cohérence visuelle globale à faire, périmètre exact à clarifier avec l'utilisateur au démarrage de la prochaine session.
 2. Harmoniser encore la taille/le visuel des dés (au-delà des ajustements déjà faits ci-dessus) — demander à l'utilisateur ce qui le gêne précisément avant de retoucher à l'aveugle.
-3. Construire l'onglet **Sons** (import de dossier via `webkitdirectory`, avec repli par sélection multiple de fichiers pour les navigateurs qui ne le supportent pas comme Safari ; lecture via `<audio>`).
 
 ## Suggestions pour la reprise (avis de l'assistant, pas des demandes de l'utilisateur)
 

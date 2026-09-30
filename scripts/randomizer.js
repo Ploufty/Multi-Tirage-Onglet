@@ -1181,7 +1181,11 @@
         if (!canPlaySound(file) && /^(wma|midi?|aiff?)$/.test(fileExtension(file.name))) { done(null); return; }
         var url = URL.createObjectURL(file);
         var entry = { name: fileDisplayName(file.name), url: url, listened: false };
-        if (IS_IOS) { done(canPlaySound(file) ? entry : null); return; }
+        if (IS_IOS) {
+            if (!canPlaySound(file)) { URL.revokeObjectURL(url); entry = null; }
+            done(entry);
+            return;
+        }
         var probe = document.createElement('audio');
         var settled = false;
         function settle(ok) {

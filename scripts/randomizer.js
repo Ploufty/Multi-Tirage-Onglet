@@ -16,7 +16,8 @@
     var confettiLayer = document.getElementById('confettiLayer');
     var removeDrawnToggle = document.getElementById('removeDrawnToggle');
     var showHistoryToggle = document.getElementById('showHistoryToggle');
-    var showSettingsToggle = document.getElementById('showSettingsToggle');
+    var btnSettings = document.getElementById('btnSettings');
+    var showSettings = true;
     var confettiOption = document.getElementById('confettiOption');
     var confettiToggle = document.getElementById('confettiToggle');
     var historyPanel = document.getElementById('historyPanel');
@@ -77,6 +78,9 @@
     var soundFolderInput = document.getElementById('soundFolderInput');
     var soundFilesInput = document.getElementById('soundFilesInput');
     var showSoundNameToggle = document.getElementById('showSoundNameToggle');
+    var soundAutoToggle = document.getElementById('soundAutoToggle');
+    var soundGapRange = document.getElementById('soundGapRange');
+    var soundGapValue = document.getElementById('soundGapValue');
 
     var IMAGE_LIMIT = 300;
     var THUMB_MAX = 480;
@@ -106,6 +110,8 @@
     var soundAnalyser = null;
     var soundLevels = null;
     var soundFrame = null;
+    var soundAutoTimer = null;  // countdown before the next sound (auto mode)
+    var soundAutoLeft = 0;
 
     function bindAction(element, action) {
         var el = typeof element === 'string' ? document.querySelector(element) : element;
@@ -138,8 +144,9 @@
             renderImageStage();
         }
         confettiOption.hidden = tabName === 'sounds';
-        if (tabName !== 'sounds' && !soundAudio.paused) {
-            soundAudio.pause();
+        if (tabName !== 'sounds') {
+            cancelSoundAuto();
+            if (!soundAudio.paused) { soundAudio.pause(); }
         }
         try { localStorage.setItem('randomizer_active_tab', tabName); } catch (e) {}
     }
@@ -1232,6 +1239,7 @@
     }
 
     function stopSound() {
+        cancelSoundAuto();
         soundAudio.pause();
         soundAudio.removeAttribute('src');
         soundAudio.load();
@@ -1284,6 +1292,11 @@
 
     function toggleSound() {
         if (isSoundLoading || !sounds.length) { return; }
+        if (soundAutoTimer) {
+            cancelSoundAuto();
+            renderSounds();
+            return;
+        }
         if (!soundAudio.paused) {
             soundAudio.pause();
             return;
@@ -1291,6 +1304,10 @@
         setupAnalyser();
         if (soundContext && soundContext.state === 'suspended') { soundContext.resume(); }
         if (soundAudio.ended) { soundAudio.currentTime = 0; }
+        // Neutral title for the system media controls, so they do not give away the sound.
+        if (navigator.mediaSession && window.MediaMetadata) {
+            try { navigator.mediaSession.metadata = new window.MediaMetadata({ title: 'Tirage des sons' }); } catch (e) {}
+        }
         var played = soundAudio.play();
         if (played && played.catch) {
             played.catch(function() {
@@ -1316,6 +1333,47 @@
         cancelAnimationFrame(soundFrame);
         soundSpeaker.style.setProperty('--level', '0');
         renderSounds();
+    }
+
+    // Auto mode: when a sound ends, wait the chosen pause then play the next one.
+    function onSoundEnded() {
+        onSoundStop();
+        if (soundAutoToggle.checked && soundIndex < sounds.length - 1) {
+            soundAutoLeft = parseInt(soundGapRange.value, 10);
+            tickSoundAuto();
+        }
+    }
+
+    function tickSoundAuto() {
+        if (soundAutoLeft <= 0) {
+            soundAutoTimer = null;
+            goToSound(soundIndex + 1);
+            toggleSound();
+            return;
+        }
+        soundStatusText.textContent = 'Son suivant dans ' + soundAutoLeft + ' s…';
+        soundPlayButton.textContent = 'Arrêter l’enchaînement';
+        soundAutoLeft--;
+        soundAutoTimer = setTimeout(tickSoundAuto, 1000);
+    }
+
+    function cancelSoundAuto() {
+        if (soundAutoTimer) {
+            clearTimeout(soundAutoTimer);
+            soundAutoTimer = null;
+        }
+    }
+
+    function persistSoundAuto() {
+        soundGapValue.textContent = soundGapRange.value;
+        if (!soundAutoToggle.checked && soundAutoTimer) {
+            cancelSoundAuto();
+            renderSounds();
+        }
+        try {
+            localStorage.setItem('randomizer_sound_auto', soundAutoToggle.checked ? '1' : '0');
+            localStorage.setItem('randomizer_sound_gap', soundGapRange.value);
+        } catch (e) {}
     }
 
     function playButtonLabel(entry) {
@@ -1453,7 +1511,7 @@
         try {
             localStorage.setItem('randomizer_remove_drawn', removeDrawnToggle.checked ? '1' : '0');
             localStorage.setItem('randomizer_show_history', showHistoryToggle.checked ? '1' : '0');
-            localStorage.setItem('randomizer_show_settings', showSettingsToggle.checked ? '1' : '0');
+            localStorage.setItem('randomizer_show_settings', showSettings ? '1' : '0');
             localStorage.setItem('randomizer_confetti_enabled', confettiToggle.checked ? '1' : '0');
         } catch (e) {}
     }
@@ -1513,7 +1571,13 @@
 
     // The settings column (left) can be hidden in every tab to give the result more room.
     function updateSettingsVisibility() {
-        layout.classList.toggle('noSettings', !showSettingsToggle.checked);
+        layout.classList.toggle('noSettings', !showSettings);
+        var label = showSettings ? 'Masquer les réglages' : 'Afficher les réglages';
+        btnSettings.setAttribute('aria-pressed', showSettings ? 'true' : 'false');
+        btnSettings.title = label;
+        btnSettings.setAttribute('aria-label', label);
+        btnSettings.querySelector('.iconEye').hidden = !showSettings;
+        btnSettings.querySelector('.iconEyeOff').hidden = showSettings;
         refreshSizes();
     }
 
@@ -1544,7 +1608,9 @@
     }, false);
     soundAudio.addEventListener('play', onSoundPlay, false);
     soundAudio.addEventListener('pause', onSoundStop, false);
-    soundAudio.addEventListener('ended', onSoundStop, false);
+    soundAudio.addEventListener('ended', onSoundEnded, false);
+    soundAutoToggle.addEventListener('change', persistSoundAuto, false);
+    soundGapRange.addEventListener('input', persistSoundAuto, false);
     soundAudio.addEventListener('error', function() { if (sounds.length) { renderSounds(); } }, false);
     showSoundNameToggle.addEventListener('change', function() {
         try { localStorage.setItem('randomizer_sound_show_name', showSoundNameToggle.checked ? '1' : '0'); } catch (e) {}
@@ -1618,10 +1684,11 @@
         }, false);
     }
 
-    showSettingsToggle.addEventListener('change', function() {
+    bindAction(btnSettings, function() {
+        showSettings = !showSettings;
         persistOptions();
         updateSettingsVisibility();
-    }, false);
+    });
 
     if (confettiToggle.addEventListener) {
         confettiToggle.addEventListener('change', persistOptions, false);
@@ -1661,7 +1728,7 @@
         removeDrawnToggle.checked = localStorage.getItem('randomizer_remove_drawn') === '1';
         var savedShowHistory = localStorage.getItem('randomizer_show_history');
         showHistoryToggle.checked = savedShowHistory === null ? true : savedShowHistory === '1';
-        showSettingsToggle.checked = localStorage.getItem('randomizer_show_settings') !== '0';
+        showSettings = localStorage.getItem('randomizer_show_settings') !== '0';
         var savedConfetti = localStorage.getItem('randomizer_confetti_enabled');
         confettiToggle.checked = savedConfetti === null ? true : savedConfetti === '1';
         var savedHistory = localStorage.getItem('randomizer_history');
@@ -1683,8 +1750,13 @@
         removeImageToggle.checked = localStorage.getItem('randomizer_image_remove') === '1';
         showImageNameToggle.checked = localStorage.getItem('randomizer_image_show_name') !== '0';
         showSoundNameToggle.checked = localStorage.getItem('randomizer_sound_show_name') !== '0';
+        soundAutoToggle.checked = localStorage.getItem('randomizer_sound_auto') === '1';
+        var savedGap = parseInt(localStorage.getItem('randomizer_sound_gap'), 10);
+        if (savedGap >= 1 && savedGap <= 30) { soundGapRange.value = savedGap; }
+        soundGapValue.textContent = soundGapRange.value;
+        if (soundAutoToggle.checked) { document.getElementById('soundAutoBox').open = true; }
         var savedImageDuration = parseInt(localStorage.getItem('randomizer_image_duration'), 10);
-        if (savedImageDuration >= 3 && savedImageDuration <= 7) {
+        if (savedImageDuration >= 2 && savedImageDuration <= 6) {
             imageDurationRange.value = savedImageDuration;
         }
     } catch (e) {}

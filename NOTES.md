@@ -76,7 +76,7 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Choix d'un dossier (`webkitdirectory`, sous-dossiers inclus) ou de fichiers multiples (repli pour iPad/iPhone). Images gardées en mémoire (URL d'objets), pas de persistance (décision ci-dessous). 300 images max.
    - Chaque fichier est chargé pour vérifier qu'il s'affiche ; les illisibles (HEIC/TIFF hors Safari, fichiers abîmés) sont listés avec la raison dans un compte rendu. Miniatures réduites à 480 px pour que le carrousel reste fluide avec des photos de téléphone (SVG gardés tels quels).
    - Animation : bande de tuiles qui défile et ralentit (easing), repères rouges au centre, la tuile tirée grossit puis l'image s'affiche en grand dans un cadre blanc au format de l'image (lisible en mode sombre, petites images agrandies), avec le nom du fichier en légende (masquable).
-   - Options : durée 3-7 s, retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
+   - Options : durée 3-7 s (devenue 2-6 s, voir 21), retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
    - Notice des formats acceptés dans l'onglet (bloc repliable) et dans le README.
 19. **Onglet Sons** (maquette fournie par l'utilisateur : capture d'un manuel numérique « Reconnaissons les bruits familiers » ; seul le principe est repris, ni le code WinJS/Pubreader, ni le caméléon de l'éditeur) :
    - Import d'un dossier ou de fichiers (200 sons max). Chaque son est testé (métadonnées lues) ; WMA, MIDI, AIFF hors Safari et fichiers abîmés sont listés avec la raison. Sur iPad/iPhone, pas de préchargement possible sans geste : on s'appuie sur `canPlayType`.
@@ -88,7 +88,11 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Pas de confettis dans l'onglet Sons : l'option « Confettis » y est masquée.
 20. **Barre d'onglets et colonne Réglages** :
    - Les onglets s'étirent pour remplir leur ligne ; les options (Réglages, Historique, Confettis) restent à droite, séparées par un trait vertical (trait horizontal au-dessus sur téléphone). Une première version avec les options sur une ligne à part a été écartée : elle poussait le bouton Lancer sous le bas de l'écran sur les portables 1280×720 et 1366×768.
-   - Nouvelle option « Réglages » (cochée par défaut, mémorisée) : masque la colonne de gauche dans tous les onglets ; le résultat prend la place.
+   - Nouvelle option « Réglages » (affichée par défaut, mémorisée) : masque la colonne de gauche dans tous les onglets ; le résultat prend la place. Devenue ensuite un **bouton œil** (œil ouvert / œil barré) à la demande de l'utilisateur.
+21. **Retours sur l'onglet Sons et les durées** :
+   - Le nom du son était « annoncé » au début de la lecture : la zone du nom n'est plus une zone `aria-live` (les lecteurs d'écran la lisaient), et les commandes média du système reçoivent un titre neutre « Tirage des sons » (Media Session). Si l'annonce persiste, demander à l'utilisateur sur quel appareil / navigateur.
+   - « Défilement automatique » (bloc repliable sous Remélanger / Vider) : « Enchaîner les sons » + pause entre deux sons de 1 à 30 s (5 s par défaut), mémorisés. Décompte affiché (« Son suivant dans 3 s… »), le bouton devient « Arrêter l'enchaînement » ; Pause, Précédent/Suivant, Remélanger, Vider ou un changement d'onglet l'arrêtent.
+   - Durée des tirages Noms et Images : **2 à 6 s, 3 s par défaut** (au lieu de 3 à 7 s, 5 s).
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 

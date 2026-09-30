@@ -289,7 +289,9 @@ main.container {
 }
 
 .speedHeader label { margin: 0; font-size: 1rem; }
-.speedHeader strong { color: var(--blue); font-size: 1.2rem; }
+.speedHeader strong { color: var(--blue); font-size: 1.2rem; white-space: nowrap; }
+.autoPlayBody .speedHeader { gap: .5rem; }
+.autoPlayBody .speedHeader label { font-size: .9rem; }
 
 .rangeLabels {
     display: flex;
@@ -692,6 +694,18 @@ main.container {
 }
 
 /* ---------- Onglet Sons ---------- */
+
+.optionsBar .settingsEye { align-self: center; }
+.settingsEye[aria-pressed="false"] { color: var(--muted); }
+
+.autoPlayBody {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 0 .9rem .9rem;
+}
+
+.autoPlayBody .speedBox { flex: none; padding: .6rem .9rem; background: var(--surface); }
 
 .formatNotice ol { padding: 0 .9rem .5rem 2rem; }
 .formatNotice ol li + li { margin-top: .35rem; }

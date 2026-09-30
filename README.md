@@ -35,6 +35,7 @@ Choisir un dossier (bouton « Choisir un dossier ») ou plusieurs fichiers (« C
 - Les images restent sur l'appareil (rien n'est envoyé) et ne sont pas conservées : il faut les rechoisir après un rechargement de la page.
 - Sur iPad et iPhone, le choix d'un dossier n'est pas possible : utiliser « Choisir des images ».
 - Options : durée du tirage (2 à 6 s, 3 s par défaut), retirer l'image tirée (« Réinitialiser » remet toutes les images en jeu), historique partagé avec les autres onglets.
+- La croix rouge d'une miniature retire cette image du tirage ; la pastille en haut à droite de l'image tirée (ou un clic sur l'image) l'affiche en grand, Échap pour fermer.
 
 ## Onglet Sons : mode d'emploi et formats acceptés
 

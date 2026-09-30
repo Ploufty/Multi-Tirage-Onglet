@@ -552,30 +552,84 @@ main.container {
 
 /* ---------- Onglet Images : réglages ---------- */
 
-.importReport { margin: 0; }
+/* Réglages plus compacts : texte plus petit, cibles tactiles de 44 px conservées. */
+#tabPanel-images .settingsPanel { gap: .6rem; }
+#tabPanel-images .settingsPanel .btn { font-size: .9rem; padding-inline: .75rem; }
+#tabPanel-images .toggle-wrap { gap: .6rem; font-size: .9rem; }
+#tabPanel-images .toggle { width: 2.5rem; height: 1.4rem; }
+#tabPanel-images .toggle-slider::before { width: 1.05rem; height: 1.05rem; left: .175rem; top: .175rem; }
+#tabPanel-images .toggle input:checked + .toggle-slider::before { transform: translateX(1.1rem); }
+#tabPanel-images .formatNotice { font-size: .85rem; }
+
+.importReport { margin: 0; font-size: .85rem; }
 .importReport ul { margin: .35rem 0 0 1.1rem; overflow-wrap: anywhere; }
 .importReport p + p { margin-top: .25rem; }
 
 .imageThumbs {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
     gap: .4rem;
-    max-height: 12rem;
+    max-height: 13rem;
+    flex: none;
     overflow-y: auto;
     list-style: none;
 }
 
 .imageThumbs li {
+    position: relative;
     aspect-ratio: 1;
     padding: 2px;
     background: #fff; /* images transparentes lisibles, même en mode sombre */
     border: 1px solid var(--border);
     border-radius: .5rem;
-    overflow: hidden;
 }
 
 .imageThumbs img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.imageThumbs li.drawn { opacity: .3; }
+.imageThumbs li.drawn img { opacity: .3; }
+
+/* Petite croix rouge pour retirer une image : pastille de 22 px dans le coin,
+   zone tactile de 44 px (le coin haut droit de la miniature). */
+.thumbRemove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0 .5rem 0 0;
+}
+
+.thumbRemove::before,
+.thumbRemove::after {
+    content: "";
+    position: absolute;
+    top: .2rem;
+    right: .2rem;
+}
+
+.thumbRemove::before {
+    width: 1.35rem;
+    height: 1.35rem;
+    background: var(--red);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+    transition: transform .2s var(--spring);
+}
+
+/* La croix blanche, dessinée par un masque SVG au centre de la pastille. */
+.thumbRemove::after {
+    width: 1.35rem;
+    height: 1.35rem;
+    background: #fff;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 8l8 8M16 8l-8 8' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 8l8 8M16 8l-8 8' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+
+.thumbRemove:hover::before { transform: scale(1.15); }
+.thumbRemove:focus-visible { outline-offset: -3px; }
 
 .formatNotice {
     font-size: .9rem;
@@ -674,9 +728,11 @@ main.container {
 
 /* Résultat : cadre blanc au format de l'image, qui agrandit aussi les petites images. */
 .imageFinal {
+    position: relative;
     height: 100%;
     max-width: 100%;
-    padding: clamp(.3rem, 1vw, .75rem);
+    padding: clamp(.25rem, .6vw, .5rem);
+    cursor: zoom-in;
     background: #fff;
     border: 3px solid var(--blue);
     border-radius: var(--radius);
@@ -684,6 +740,88 @@ main.container {
 }
 
 .imageFinal.winner { animation: popWinner .45s var(--spring); }
+
+/* Pastille « afficher en grand », en haut à droite de l'image tirée. */
+.zoomBtn {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: #fff;
+    background: #000091; /* fixe : le cadre reste blanc dans les deux thèmes */
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 .15rem .5rem rgba(0, 0, 60, .35);
+    transition: transform .25s var(--spring);
+}
+
+.zoomBtn:hover { transform: scale(1.1); }
+.zoomBtn::before {
+    content: "";
+    width: 1.25rem;
+    height: 1.25rem;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") center / 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+
+/* Image en grand : couvre toute la fenêtre (ou l'écran en plein écran). */
+.imageLightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(10, 10, 25, .88);
+    animation: lightboxIn .2s ease-out;
+}
+
+.lightboxFigure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    width: 100%;
+    height: 100%;
+}
+
+/* Le plus grand cadre au format de l'image qui tient dans la fenêtre (petites images agrandies). */
+.lightboxFrame {
+    --ratio: 1;
+    --maxH: calc(100vh - 2rem);
+    width: min(100%, calc(var(--maxH) * var(--ratio)));
+    aspect-ratio: var(--ratio);
+    max-height: var(--maxH);
+    padding: clamp(.3rem, 1vw, .75rem);
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 .5rem 2rem rgba(0, 0, 0, .5);
+}
+
+.withCaption .lightboxFrame { --maxH: calc(100vh - 2rem - clamp(2.2rem, 6vw, 5rem)); }
+
+.lightboxFrame img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+.lightboxFigure .imageCaption { color: #fff; font-size: clamp(1.6rem, 5vw, 4rem); text-align: center; }
+
+.lightboxClose {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: var(--blue);
+}
+
+@keyframes lightboxIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
 .imageCaption {
     max-width: 100%;
@@ -965,6 +1103,75 @@ main.container {
 
 @media (max-width: 44rem) {
     .hero p { display: none; }
+}
+
+/* ---------- Ajustement à la fenêtre (tablette, ENI, TBI, ordinateur) ----------
+   Tout tient dans la hauteur de la fenêtre, sans défiler : la zone de résultat prend
+   la place restante, les colonnes de réglages et d'historique défilent en interne.
+   Sur une fenêtre trop basse pour le contenu minimal, la page défile comme avant. */
+@media (min-width: 44.01rem) and (min-height: 30rem) {
+    body { height: 100vh; height: 100dvh; min-height: 0; }
+    #app { min-height: 0; }
+    main.container { flex: 1 1 auto; min-height: 0; padding-block: var(--gap); }
+    .layout { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+    .layout .card { min-height: 0; }
+    /* La rangée a une hauteur fixe : l'historique s'étire simplement, sa liste défile. */
+    .layout .historyPanel { height: auto; }
+    .historyList { min-height: 0; }
+    .settingsPanel { overflow-y: auto; }
+    /* Un nom très long défile dans la carte au lieu de passer sous le bouton Lancer. */
+    .drawPanel .resultCard { flex: 1 1 0; min-height: 11rem; overflow-y: auto; }
+    #resultName { font-size: clamp(2rem, min(7vw, 11vh), 6rem); }
+    .diceFaces,
+    .imageStage,
+    #app:fullscreen .diceFaces,
+    #app.fakeFullscreen .diceFaces,
+    #app:fullscreen .imageStage,
+    #app.fakeFullscreen .imageStage { flex: 1 1 0; height: auto; min-height: 6rem; }
+    #nameList { min-height: 6rem; }
+    .footer { padding-block: .5rem; }
+    .hero { padding-block: .6rem 1rem; }
+    .hero p { display: none; }
+}
+
+/* Fenêtre peu haute (portable, TBI 1024×768) : marges resserrées pour agrandir le résultat. */
+@media (min-width: 44.01rem) and (min-height: 30rem) and (max-height: 56rem) {
+    main.container { gap: .6rem; padding-block: .6rem; }
+    .layout .card { padding: .9rem; gap: .6rem; }
+    .resultCard { padding: .6rem; gap: .4rem; }
+    .diceTotal { line-height: 1.2; }
+    .footer { padding-block: .35rem; }
+    .speedBox { padding: .4rem 1rem; }
+    .rangeLabels { display: none; }
+    .drawButton { min-height: 3.75rem; }
+    .imageCaption { font-size: clamp(1.2rem, min(4vw, 5vh), 3rem); }
+}
+
+/* ENI / TBI 1024×768 et écrans moyens assez larges : l'historique reste en 3e colonne
+   (étroite) plutôt que de prendre une rangée entière sous le résultat. */
+@media (min-width: 60rem) and (max-width: 64rem) and (min-height: 30rem) {
+    .layout { grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr) minmax(11rem, 13rem); }
+    .layout.noHistory { grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr); }
+    .historyPanel { grid-column: auto; }
+    .historyList { max-height: none; }
+}
+
+/* Historique sous les deux colonnes : une rangée de plus, liste courte. */
+@media (min-width: 44.01rem) and (max-width: 59.99rem) and (min-height: 30rem) {
+    .layout { grid-template-rows: minmax(0, 1fr) auto; }
+    /* Hauteur fixe : la liste qui se remplit ne doit pas rétrécir la zone de résultat. */
+    .historyList { height: 5.5rem; max-height: none; }
+    .historyPanel { padding-block: .6rem; gap: .3rem; }
+    .historyPanel .panelHeader h2 { font-size: 1.05rem; }
+    .hero p { display: none; }
+    .hero { padding-block: .6rem .9rem; }
+}
+
+/* Colonne de résultat étroite : durée et bouton Lancer restent sur une seule ligne. */
+@media (min-width: 44.01rem) and (max-width: 64rem) and (min-height: 30rem) {
+    .speedBox { flex-basis: 9rem; padding: .4rem .9rem; }
+    .rangeLabels { display: none; }
+    .drawButton { min-width: 0; min-height: 3.75rem; padding-inline: 1.2rem; font-size: 1.15rem; }
 }
 
 /* Paysage bas (tablette ou téléphone couché) : pas de grand titre. */

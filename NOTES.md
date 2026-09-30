@@ -76,9 +76,15 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Choix d'un dossier (`webkitdirectory`, sous-dossiers inclus) ou de fichiers multiples (repli pour iPad/iPhone). Images gardées en mémoire (URL d'objets), pas de persistance (décision ci-dessous). 300 images max.
    - Chaque fichier est chargé pour vérifier qu'il s'affiche ; les illisibles (HEIC/TIFF hors Safari, fichiers abîmés) sont listés avec la raison dans un compte rendu. Miniatures réduites à 480 px pour que le carrousel reste fluide avec des photos de téléphone (SVG gardés tels quels).
    - Animation : bande de tuiles qui défile et ralentit (easing), repères rouges au centre, la tuile tirée grossit puis l'image s'affiche en grand dans un cadre blanc au format de l'image (lisible en mode sombre, petites images agrandies), avec le nom du fichier en légende (masquable).
-   - Options : durée 3-7 s (devenue 2-6 s, voir 21), retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
+   - Options : durée 3-7 s (devenue 2-6 s, voir 22), retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
    - Notice des formats acceptés dans l'onglet (bloc repliable) et dans le README.
-19. **Onglet Sons** (maquette fournie par l'utilisateur : capture d'un manuel numérique « Reconnaissons les bruits familiers » ; seul le principe est repris, ni le code WinJS/Pubreader, ni le caméléon de l'éditeur) :
+19. **Retours sur l'onglet Images + ajustement à la fenêtre** :
+   - Réglages de l'onglet Images plus compacts (texte plus petit, interrupteurs plus petits, cibles tactiles de 44 px conservées).
+   - Croix rouge sur chaque miniature pour retirer une image du tirage.
+   - Image tirée plus grande, avec une pastille « afficher en grand » en haut à droite (clic sur l'image aussi) : affichage plein écran de l'image au format d'origine, fermeture par la croix, Échap ou clic sur le fond.
+   - **Toute l'appli tient dans la fenêtre** dès 44rem de large et 30rem de haut (tablette, ENI, TBI, ordinateur) : plus de défilement, la zone de résultat prend la place restante, réglages et historique défilent dans leur colonne. Titre compact (sans sous-titre), marges resserrées sur écrans peu hauts. Historique en 3e colonne étroite dès 60rem (ENI/TBI 1024×768), sinon en dessous avec une hauteur fixe. Téléphone : défilement conservé.
+   - Dés : taille calculée avec 4 % de marge pour le rebond d'atterrissage ; ils sont nettement plus grands sur portable et TBI 1024×768 (ex. 84 → 139 px à 1366×768).
+20. **Onglet Sons** (maquette fournie par l'utilisateur : capture d'un manuel numérique « Reconnaissons les bruits familiers » ; seul le principe est repris, ni le code WinJS/Pubreader, ni le caméléon de l'éditeur) :
    - Import d'un dossier ou de fichiers (200 sons max). Chaque son est testé (métadonnées lues) ; WMA, MIDI, AIFF hors Safari et fichiers abîmés sont listés avec la raison. Sur iPad/iPhone, pas de préchargement possible sans geste : on s'appuie sur `canPlayType`.
    - Les sons sont **mélangés une fois à l'import** (Fisher-Yates), puis parcourus dans cet ordre : « Son précédent » / « Son suivant », compteur « 3 / 12 », barre d'une case par son (courant en bleu, écoutés cochés en vert, clic pour y aller ; cases sans numéro au-delà de 24 sons). « Remélanger » refait un ordre et repart du début.
    - Bouton principal : « Écouter le son » → « Pause » pendant la lecture → « Reprendre l'écoute » → « Réécouter » une fois le son fini.
@@ -86,10 +92,10 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Option « Afficher le nom du son » (décochée = jeu de devinette). Le son entre dans l'historique (liseré bleu) à sa première écoute. Clavier : Espace = écouter/pause, ← → = précédent/suivant. Le son s'arrête quand on change d'onglet.
    - Notices repliables dans l'onglet : « Mode d'emploi » et « Formats acceptés » (aussi dans le README).
    - Pas de confettis dans l'onglet Sons : l'option « Confettis » y est masquée.
-20. **Barre d'onglets et colonne Réglages** :
+21. **Barre d'onglets et colonne Réglages** :
    - Les onglets s'étirent pour remplir leur ligne ; les options (Réglages, Historique, Confettis) restent à droite, séparées par un trait vertical (trait horizontal au-dessus sur téléphone). Une première version avec les options sur une ligne à part a été écartée : elle poussait le bouton Lancer sous le bas de l'écran sur les portables 1280×720 et 1366×768.
    - Nouvelle option « Réglages » (affichée par défaut, mémorisée) : masque la colonne de gauche dans tous les onglets ; le résultat prend la place. Devenue ensuite un **bouton œil avec texte** (« Masquer les réglages » œil ouvert / « Afficher les réglages » œil barré) à la demande de l'utilisateur. Au passage : les icônes SVG n'ont pas de propriété `.hidden` en JS, il faut poser l'attribut (`setIconHidden`) ; l'icône du plein écran avait le même défaut, corrigé.
-21. **Retours sur l'onglet Sons et les durées** :
+22. **Retours sur l'onglet Sons et les durées** :
    - Le nom du son était « annoncé » au début de la lecture : la zone du nom n'est plus une zone `aria-live` (les lecteurs d'écran la lisaient), et les commandes média du système reçoivent un titre neutre « Tirage des sons » (Media Session). Si l'annonce persiste, demander à l'utilisateur sur quel appareil / navigateur.
    - « Défilement automatique » (bloc repliable sous Remélanger / Vider) : « Enchaîner les sons » + pause entre deux sons de 1 à 30 s (5 s par défaut), mémorisés. Décompte affiché (« Son suivant dans 3 s… »), le bouton devient « Arrêter l'enchaînement » ; Pause, Précédent/Suivant, Remélanger, Vider ou un changement d'onglet l'arrêtent.
    - Durée des tirages Noms et Images : **2 à 6 s, 3 s par défaut** (au lieu de 3 à 7 s, 5 s).

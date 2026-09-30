@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tirage au sort</title>
-<meta name="description" content="Tirer au sort un nom dans une liste, lancer des dés ou tirer une image, sur tablette comme au tableau.">
+<meta name="description" content="Tirer au sort un nom dans une liste, lancer des dés, tirer une image ou écouter des sons au hasard, sur tablette comme au tableau.">
 <meta name="theme-color" content="#000091">
 <link rel="icon" href="icon.png">
 
@@ -47,7 +47,7 @@
         </div>
         <div class="container hero">
             <h1>Tirage <span class="accent">au sort</span></h1>
-            <p>Tire un nom dans une liste, lance des dés ou tire une image, sur tablette comme au tableau.</p>
+            <p>Tire un nom dans une liste, lance des dés, tire une image ou fait écouter des sons, sur tablette comme au tableau.</p>
         </div>
         <div class="tricolore" aria-hidden="true"></div>
     </header>
@@ -58,13 +58,19 @@
                 <button type="button" class="tabButton active" data-tab="names" role="tab" aria-selected="true">Noms</button>
                 <button type="button" class="tabButton" data-tab="dice" role="tab" aria-selected="false">Dés</button>
                 <button type="button" class="tabButton" data-tab="images" role="tab" aria-selected="false">Images</button>
+                <button type="button" class="tabButton" data-tab="sounds" role="tab" aria-selected="false">Sons</button>
             </nav>
             <div class="optionsBar">
+                <button type="button" id="btnSettings" class="icon-btn settingsEye" aria-pressed="true" title="Masquer les réglages">
+                    <svg class="iconEye" viewBox="0 0 24 24" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.2"/></svg>
+                    <svg class="iconEyeOff" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M10.6 5.1A10 10 0 0 1 12 4.5c6.5 0 10.5 7.5 10.5 7.5a18 18 0 0 1-3.1 4M6.6 6.6A17.6 17.6 0 0 0 1.5 12S5.5 19.5 12 19.5a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3.2 3.2 0 0 0 4.2 4.2M2.5 2.5l19 19"/></svg>
+                    <span class="settingsEyeText">Masquer les réglages</span>
+                </button>
                 <label class="toggle-wrap">
                     <span class="toggle"><input type="checkbox" id="showHistoryToggle" checked><span class="toggle-slider"></span></span>
                     Historique
                 </label>
-                <label class="toggle-wrap">
+                <label class="toggle-wrap" id="confettiOption">
                     <span class="toggle"><input type="checkbox" id="confettiToggle" checked><span class="toggle-slider"></span></span>
                     Confettis
                 </label>
@@ -101,10 +107,10 @@
                         <div class="speedBox">
                             <div class="speedHeader">
                                 <label for="durationRange">Durée du tirage</label>
-                                <strong><span id="durationValue">5</span> s</strong>
+                                <strong><span id="durationValue">3</span> s</strong>
                             </div>
-                            <input id="durationRange" type="range" min="3" max="7" value="5" step="1">
-                            <div class="rangeLabels"><span>3 s</span><span>7 s</span></div>
+                            <input id="durationRange" type="range" min="2" max="6" value="3" step="1">
+                            <div class="rangeLabels"><span>2 s</span><span>6 s</span></div>
                         </div>
                         <button type="button" id="drawButton" class="btn drawButton">
                             <span class="dieButton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
@@ -220,16 +226,117 @@
                         <div class="speedBox">
                             <div class="speedHeader">
                                 <label for="imageDurationRange">Durée du tirage</label>
-                                <strong><span id="imageDurationValue">5</span> s</strong>
+                                <strong><span id="imageDurationValue">3</span> s</strong>
                             </div>
-                            <input id="imageDurationRange" type="range" min="3" max="7" value="5" step="1">
-                            <div class="rangeLabels"><span>3 s</span><span>7 s</span></div>
+                            <input id="imageDurationRange" type="range" min="2" max="6" value="3" step="1">
+                            <div class="rangeLabels"><span>2 s</span><span>6 s</span></div>
                         </div>
                         <button type="button" id="imageDrawButton" class="btn drawButton">
                             <span class="dieButton" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
                             Lancer
                         </button>
                     </div>
+                </section>
+            </div>
+
+            <div class="tabPanel" id="tabPanel-sounds" hidden>
+                <section class="card settingsPanel">
+                    <div class="panelHeader">
+                        <h2>Sons</h2>
+                        <span id="soundCountBadge" class="badge">0 son</span>
+                    </div>
+                    <div class="btn-row">
+                        <button type="button" id="btnSoundFolder" class="btn">Choisir un dossier</button>
+                        <button type="button" id="btnSoundFiles" class="btn btn-ghost">Choisir des sons</button>
+                    </div>
+                    <input type="file" id="soundFolderInput" webkitdirectory directory multiple hidden>
+                    <input type="file" id="soundFilesInput" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.oga,.opus,.flac,.weba" multiple hidden>
+
+                    <div id="soundReport" class="alert importReport" role="status" hidden></div>
+
+                    <label class="toggle-wrap">
+                        <span class="toggle"><input type="checkbox" id="showSoundNameToggle" checked><span class="toggle-slider"></span></span>
+                        Afficher le nom du son
+                    </label>
+                    <div class="btn-row">
+                        <button type="button" id="btnSoundShuffle" class="btn btn-ghost">Remélanger</button>
+                        <button type="button" id="btnSoundClear" class="btn btn-ghost btnDanger">Vider</button>
+                    </div>
+
+                    <details class="formatNotice autoPlayBox" id="soundAutoBox">
+                        <summary>Défilement automatique</summary>
+                        <div class="autoPlayBody">
+                            <label class="toggle-wrap">
+                                <span class="toggle"><input type="checkbox" id="soundAutoToggle"><span class="toggle-slider"></span></span>
+                                Enchaîner les sons
+                            </label>
+                            <div class="speedBox">
+                                <div class="speedHeader">
+                                    <label for="soundGapRange">Pause entre deux sons</label>
+                                    <strong><span id="soundGapValue">5</span> s</strong>
+                                </div>
+                                <input id="soundGapRange" type="range" min="1" max="30" value="5" step="1">
+                                <div class="rangeLabels"><span>1 s</span><span>30 s</span></div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="formatNotice">
+                        <summary>Mode d'emploi</summary>
+                        <ol>
+                            <li>Choisis un dossier de sons (ou plusieurs fichiers) : ils sont mélangés au hasard.</li>
+                            <li>« Écouter » lance le son en cours ; pendant la lecture, le bouton met en pause puis reprend. Une fois le son terminé, « Réécouter » le rejoue.</li>
+                            <li>« Son suivant » et « Son précédent » parcourent le tirage. La barre du bas montre où tu en es : clique sur une case pour y aller.</li>
+                            <li>Décoche « Afficher le nom du son » pour faire deviner le bruit aux élèves.</li>
+                            <li>« Remélanger » refait un nouvel ordre et repart du début.</li>
+                            <li>« Défilement automatique » : les sons s'enchaînent seuls après une pause au choix (1 à 30 s). Lance le premier avec « Écouter le son » ; « Pause » ou un changement de son arrête le décompte.</li>
+                        </ol>
+                        <p class="noticeKeys">Clavier : Espace = écouter / pause, ← → = son précédent / suivant.</p>
+                    </details>
+
+                    <details class="formatNotice">
+                        <summary>Formats acceptés</summary>
+                        <dl>
+                            <dt class="ok">Partout</dt>
+                            <dd>MP3, WAV, M4A / AAC</dd>
+                            <dt class="warn">Selon le navigateur</dt>
+                            <dd>OGG, OPUS, WEBM (pas sur les anciens iPad / iPhone)<br>FLAC (navigateurs récents)</dd>
+                            <dt class="no">Non pris en charge</dt>
+                            <dd>WMA, MIDI, AIFF (hors Safari), vidéos</dd>
+                        </dl>
+                        <ul>
+                            <li>Conseillé : MP3.</li>
+                            <li>Sous-dossiers inclus, 200 sons au plus. Les fichiers illisibles sont signalés et écartés.</li>
+                            <li>Nom affiché = nom du fichier : <code>des_applaudissements.mp3</code> → « des applaudissements ».</li>
+                            <li>Rien n'est envoyé en ligne ; à rechoisir après un rechargement de la page.</li>
+                            <li>iPad / iPhone : utilise « Choisir des sons ».</li>
+                        </ul>
+                    </details>
+                </section>
+
+                <section class="card drawPanel">
+                    <div id="soundResultCard" class="resultCard soundCard">
+                        <div id="soundSpeaker" class="soundSpeaker" aria-hidden="true">
+                            <svg viewBox="0 0 64 64">
+                                <path class="speakerBody" d="M8 24h10l14-12v40L18 40H8z"/>
+                                <path class="speakerWave w1" d="M39 25a10 10 0 0 1 0 14"/>
+                                <path class="speakerWave w2" d="M44 19a18 18 0 0 1 0 26"/>
+                                <path class="speakerWave w3" d="M49 13a26 26 0 0 1 0 38"/>
+                            </svg>
+                        </div>
+                        <h2 class="soundTitle">Tirage des sons</h2>
+                        <div id="soundStatusText" class="statusText" aria-live="polite">Choisis un dossier de sons pour commencer.</div>
+                        <div id="soundName" class="soundName" hidden></div>
+                        <button type="button" id="soundPlayButton" class="btn drawButton soundPlayButton">Écouter le son</button>
+                    </div>
+
+                    <div class="soundNav">
+                        <button type="button" id="soundPrevButton" class="btn btn-ghost">Son précédent</button>
+                        <span id="soundCounter" class="soundCounter">0 / 0</span>
+                        <button type="button" id="soundNextButton" class="btn btn-ghost">Son suivant</button>
+                    </div>
+                    <ol id="soundProgress" class="soundProgress" aria-label="Sons du tirage" hidden></ol>
+                    <audio id="soundAudio" preload="auto"></audio>
                 </section>
             </div>
 

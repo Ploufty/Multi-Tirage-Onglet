@@ -110,7 +110,7 @@ main.container {
 
 .tabBar {
     display: flex;
-    flex: 0 1 30rem;
+    flex: 1 1 30rem;
     gap: .25rem;
     padding: .25rem;
     background: var(--surface);
@@ -138,10 +138,13 @@ main.container {
     background: var(--blue);
 }
 
+/* Options à droite des onglets, séparées par un trait vertical. */
 .optionsBar {
     display: flex;
     flex-wrap: wrap;
     gap: 0 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--control-border);
 }
 
 /* ---------- Grille : réglages | résultat | historique ---------- */
@@ -154,6 +157,9 @@ main.container {
 }
 
 .layout.noHistory { grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr); }
+.layout.noSettings { grid-template-columns: minmax(0, 1fr) minmax(13rem, 17rem); }
+.layout.noSettings.noHistory { grid-template-columns: minmax(0, 1fr); }
+.layout.noSettings .settingsPanel { display: none; }
 
 .tabPanel { display: contents; }
 
@@ -283,7 +289,9 @@ main.container {
 }
 
 .speedHeader label { margin: 0; font-size: 1rem; }
-.speedHeader strong { color: var(--blue); font-size: 1.2rem; }
+.speedHeader strong { color: var(--blue); font-size: 1.2rem; white-space: nowrap; }
+.autoPlayBody .speedHeader { gap: .5rem; }
+.autoPlayBody .speedHeader label { font-size: .9rem; }
 
 .rangeLabels {
     display: flex;
@@ -823,6 +831,143 @@ main.container {
     overflow-wrap: anywhere;
 }
 
+/* ---------- Onglet Sons ---------- */
+
+/* Bouton œil + texte : même pastille que les boutons ronds, élargie. */
+.optionsBar .settingsEye {
+    align-self: center;
+    width: auto;
+    gap: .5rem;
+    padding: 0 1rem 0 .8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.settingsEye[aria-pressed="false"] { color: var(--muted); }
+
+.autoPlayBody {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 0 .9rem .9rem;
+}
+
+.autoPlayBody .speedBox { flex: none; padding: .6rem .9rem; background: var(--surface); }
+
+.formatNotice ol { padding: 0 .9rem .5rem 2rem; }
+.formatNotice ol li + li { margin-top: .35rem; }
+.formatNotice .noticeKeys { margin: 0; padding: 0 .9rem .8rem; color: var(--muted); }
+
+.soundCard { gap: .6rem; }
+
+/* Haut-parleur : les ondes suivent le volume du son (--level, 0 à 1, calculé en JS).
+   Sans mesure possible (iPad, iPhone), elles pulsent simplement pendant la lecture. */
+.soundSpeaker {
+    --level: 0;
+    width: clamp(6rem, 16vh, 11rem);
+    aspect-ratio: 1;
+    color: var(--blue);
+    transform: scale(calc(1 + var(--level) * .12));
+}
+
+.soundSpeaker svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.speakerBody { fill: currentColor; }
+.speakerWave { opacity: .18; transition: opacity .2s; }
+
+.soundSpeaker.metered .w1 { opacity: max(.18, calc(var(--level) * 3)); }
+.soundSpeaker.metered .w2 { opacity: max(.18, calc((var(--level) - .25) * 3)); }
+.soundSpeaker.metered .w3 { opacity: max(.18, calc((var(--level) - .5) * 3)); }
+
+.soundSpeaker.playing:not(.metered) .speakerWave { animation: speakerWave 1.2s ease-in-out infinite; }
+.soundSpeaker.playing:not(.metered) .w2 { animation-delay: .15s; }
+.soundSpeaker.playing:not(.metered) .w3 { animation-delay: .3s; }
+
+@keyframes speakerWave {
+    0%, 100% { opacity: .18; }
+    40% { opacity: 1; }
+}
+
+.soundTitle {
+    margin: 0;
+    color: var(--blue);
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    line-height: 1.1;
+}
+
+.soundName {
+    max-width: 100%;
+    font-size: clamp(1.3rem, 3.2vw, 2.4rem);
+    font-style: italic;
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.soundPlayButton { margin-top: .4rem; }
+.soundPlayButton.isPlaying { background: var(--red); border-color: var(--red); }
+
+.soundNav {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+}
+
+.soundNav .btn { flex: 1 1 0; min-height: 3.25rem; padding-inline: .75rem; white-space: nowrap; }
+.soundNav .btn:disabled { opacity: .45; cursor: default; }
+
+.soundCounter {
+    flex: none;
+    min-width: 4.5rem;
+    color: var(--blue);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Barre de progression : une case par son (courant en bleu, déjà écoutés cochés). */
+.soundProgress {
+    display: flex;
+    gap: .3rem;
+    padding: .3rem;
+    list-style: none;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.soundProgress li { flex: 1 1 0; min-width: 0; }
+
+.soundProgress button {
+    width: 100%;
+    height: 1.9rem;
+    padding: 0;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--control-border);
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    overflow: hidden;
+}
+
+.soundProgress button.listened { color: var(--green); background: var(--green-soft); border-color: var(--green); }
+.soundProgress button.listened::before { content: "✓ "; }
+.soundProgress button.current { color: var(--on-accent); background: var(--blue); border-color: var(--blue); }
+.soundProgress button:hover { border-color: var(--blue); }
+
+.soundProgress.compact { gap: 2px; }
+.soundProgress.compact button { height: 1.2rem; font-size: 0; }
+.soundProgress.compact button::before { content: none; }
+
 /* ---------- Confettis ---------- */
 
 #confettiLayer {
@@ -879,11 +1024,13 @@ main.container {
 
 .historyList li[data-kind="dice"] { border-left-color: var(--orange); }
 .historyList li[data-kind="images"] { border-left-color: var(--red); }
+.historyList li[data-kind="sounds"] { border-left-color: var(--blue); }
 
 .historyList li:first-child:not(.historyEmpty) { border-color: var(--blue); border-left-width: 4px; }
 .historyList li:first-child[data-kind="names"] { border-left-color: var(--green); }
 .historyList li:first-child[data-kind="dice"] { border-left-color: var(--orange); }
 .historyList li:first-child[data-kind="images"] { border-left-color: var(--red); }
+.historyList li:first-child[data-kind="sounds"] { border-left-color: var(--blue); }
 
 .historyName {
     overflow: hidden;
@@ -918,6 +1065,8 @@ main.container {
 @media (max-width: 64rem) {
     .layout,
     .layout.noHistory { grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr); }
+    .layout.noSettings,
+    .layout.noSettings.noHistory { grid-template-columns: minmax(0, 1fr); }
     .historyPanel { grid-column: 1 / -1; }
     .historyList { max-height: 12rem; }
 }
@@ -926,16 +1075,20 @@ main.container {
 
 @media (max-width: 44rem) {
     .layout,
-    .layout.noHistory { grid-template-columns: minmax(0, 1fr); }
+    .layout.noHistory,
+    .layout.noSettings { grid-template-columns: minmax(0, 1fr); }
     .toolbar { flex-direction: column; align-items: stretch; }
     .tabBar { flex-basis: auto; }
     .tabButton { padding: 0 .5rem; }
-    .optionsBar { justify-content: center; }
+    .optionsBar { justify-content: center; padding: .5rem 0 0; border-left: 0; border-top: 2px solid var(--control-border); }
     .hero { padding-block: 1rem; }
     #nameList { min-height: 9rem; }
     .drawButton { flex: 1 1 100%; }
     .diceFaces { height: clamp(10rem, 72vw, 22rem); }
     .imageStage { height: clamp(10rem, 72vw, 22rem); }
+    .soundNav { flex-wrap: wrap; }
+    .soundNav .btn { flex-basis: 40%; font-size: .95rem; }
+    .soundCounter { order: -1; flex-basis: 100%; }
 }
 
 /* Écrans peu hauts (portable, TBI 1024×768, tablette couchée) : titre compact

@@ -1,6 +1,6 @@
 # Randomizer — Tirage au sort
 
-Application web statique de tirage au sort pour la classe, à plusieurs onglets : **Noms** (liste importable, historique, confettis), **Dés** (styles Points / Chiffres / Doigts, 1 à 6 dés) et **Images** (tirage d'une image d'un dossier, animation en carrousel). Un onglet Sons est prévu.
+Application web statique de tirage au sort pour la classe, à plusieurs onglets : **Noms** (liste importable, historique, confettis), **Dés** (styles Points / Chiffres / Doigts, 1 à 6 dés) **Images** (tirage d'une image d'un dossier, animation en carrousel) et **Sons** (sons d'un dossier mélangés puis écoutés un à un).
 
 Pour l'historique complet du projet, les décisions prises et ce qu'il reste à faire, voir [`NOTES.md`](./NOTES.md).
 
@@ -34,8 +34,29 @@ Choisir un dossier (bouton « Choisir un dossier ») ou plusieurs fichiers (« C
 - Photos d'iPhone en HEIC : les convertir en JPG, ou régler l'iPhone sur *Réglages → Appareil photo → Formats → Le plus compatible*.
 - Les images restent sur l'appareil (rien n'est envoyé) et ne sont pas conservées : il faut les rechoisir après un rechargement de la page.
 - Sur iPad et iPhone, le choix d'un dossier n'est pas possible : utiliser « Choisir des images ».
-- Options : durée du tirage (3 à 7 s), retirer l'image tirée (« Réinitialiser » remet toutes les images en jeu), historique partagé avec les autres onglets.
+- Options : durée du tirage (2 à 6 s, 3 s par défaut), retirer l'image tirée (« Réinitialiser » remet toutes les images en jeu), historique partagé avec les autres onglets.
 - La croix rouge d'une miniature retire cette image du tirage ; la pastille en haut à droite de l'image tirée (ou un clic sur l'image) l'affiche en grand, Échap pour fermer.
+
+## Onglet Sons : mode d'emploi et formats acceptés
+
+1. Choisir un dossier (« Choisir un dossier ») ou plusieurs fichiers (« Choisir des sons ») : les sons sont **mélangés au hasard**.
+2. « Écouter le son » lance le son en cours ; pendant la lecture, le bouton met en pause puis reprend. Une fois le son fini, « Réécouter » le rejoue. Le haut-parleur s'anime au rythme du son.
+3. « Son suivant » / « Son précédent » parcourent le tirage. La barre du bas montre la progression (son en cours, sons déjà écoutés) : un clic sur une case y va directement.
+4. Décocher « Afficher le nom du son » pour faire deviner le bruit.
+5. « Remélanger » refait un nouvel ordre et repart du début ; « Vider » retire les sons.
+6. « Défilement automatique » (menu repliable) : les sons s'enchaînent seuls, avec une pause au choix entre deux sons (1 à 30 s). « Arrêter l'enchaînement », « Pause » ou un changement de son arrête le décompte.
+
+Clavier : `Espace` = écouter / pause, `←` `→` = son précédent / suivant.
+
+| Prise en charge | Formats |
+|---|---|
+| Tous les navigateurs | MP3, WAV, M4A / AAC |
+| Selon le navigateur | OGG, OPUS, WEBM (pas sur les anciens iPad / iPhone) · FLAC (navigateurs récents) |
+| Non pris en charge | WMA, MIDI, AIFF (hors Safari), vidéos |
+
+- Format conseillé : **MP3**. Sous-dossiers inclus, 200 sons au maximum ; les fichiers illisibles sont signalés et écartés.
+- Nom affiché = nom du fichier : `des_applaudissements.mp3` → « des applaudissements ».
+- Les sons restent sur l'appareil (rien n'est envoyé) et sont à rechoisir après un rechargement de la page. Sur iPad et iPhone, utiliser « Choisir des sons ».
 
 ## Utiliser en local
 

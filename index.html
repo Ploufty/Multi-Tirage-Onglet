@@ -18,6 +18,15 @@
 <div id="app">
     <div id="confettiLayer" aria-hidden="true"></div>
     <div id="notifBanner" class="notifBanner" role="status" aria-live="polite"></div>
+    <div id="imageLightbox" class="imageLightbox" role="dialog" aria-modal="true" aria-label="Image tirée en grand" hidden>
+        <figure class="lightboxFigure">
+            <div id="lightboxFrame" class="lightboxFrame"><img id="lightboxImg" alt=""></div>
+            <figcaption id="lightboxCaption" class="imageCaption"></figcaption>
+        </figure>
+        <button type="button" id="btnLightboxClose" class="icon-btn lightboxClose" title="Fermer (Échap)" aria-label="Fermer (Échap)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+    </div>
 
     <header class="outil-header">
         <div class="container brandbar">

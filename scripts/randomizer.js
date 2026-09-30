@@ -55,6 +55,11 @@
     var imageFolderInput = document.getElementById('imageFolderInput');
     var imageFilesInput = document.getElementById('imageFilesInput');
     var removeImageToggle = document.getElementById('removeImageToggle');
+    var imageLightbox = document.getElementById('imageLightbox');
+    var lightboxFrame = document.getElementById('lightboxFrame');
+    var lightboxImg = document.getElementById('lightboxImg');
+    var lightboxCaption = document.getElementById('lightboxCaption');
+    var btnLightboxClose = document.getElementById('btnLightboxClose');
     var showImageNameToggle = document.getElementById('showImageNameToggle');
 
     var IMAGE_LIMIT = 300;
@@ -179,6 +184,13 @@
     document.addEventListener('keydown', function(e) {
         var tag = document.activeElement ? document.activeElement.tagName : '';
         var isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+        if (!imageLightbox.hidden) {
+            // The enlarged image is modal: only Escape (close) is handled.
+            if (e.key === 'Escape') { closeLightbox(); }
+            if (e.key !== 'Tab') { e.preventDefault(); }
+            return;
+        }
 
         if (e.key === 'Escape' && isFullscreenActive()) {
             toggleFullscreen();
@@ -357,7 +369,8 @@
     // number of dice per row (e.g. 4 dice: one row on a wide screen, 2×2 on a phone).
     function sizeDiceTiles(count) {
         var width = diceFaces.clientWidth;
-        var height = diceFaces.clientHeight;
+        // Margin for the landing bounce (scale 1.08) now that the area fits the window height.
+        var height = diceFaces.clientHeight * 0.96;
         if (!width || !height) { return; } // hidden tab: sized again when shown
         var gap = parseFloat(getComputedStyle(diceFaces).columnGap) || 0;
         var best = 0;
@@ -811,8 +824,44 @@
             img.alt = images[i].name;
             img.loading = 'lazy';
             li.appendChild(img);
+            li.appendChild(makeRemoveButton(images[i]));
             imageThumbs.appendChild(li);
         }
+    }
+
+    function makeRemoveButton(entry) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'thumbRemove';
+        btn.title = 'Retirer « ' + entry.name + ' »';
+        btn.setAttribute('aria-label', btn.title);
+        bindAction(btn, function() { removeImage(entry); });
+        return btn;
+    }
+
+    function removeImage(entry) {
+        if (isImageRolling || isImageLoading) { return; }
+        var index = images.indexOf(entry);
+        if (index === -1) { return; }
+        images.splice(index, 1);
+        if (entry === lastImage) {
+            lastImage = null;
+            imageCaption.hidden = true;
+            imageMode = 'idle';
+        }
+        if (entry.thumb !== entry.url) { URL.revokeObjectURL(entry.thumb); }
+        URL.revokeObjectURL(entry.url);
+        if (!images.length) {
+            imageMode = 'empty';
+            imageStatusText.textContent = 'Choisis un dossier d\u2019images pour commencer.';
+        }
+        renderImageThumbs();
+        updateImageCount();
+        if (imageMode !== 'final') { renderImageStage(); }
+        // Keep keyboard focus in the grid after the removed item disappears.
+        var next = imageThumbs.querySelectorAll('.thumbRemove')[Math.min(index, images.length - 1)];
+        if (next) { next.focus(); }
+        notify('« ' + entry.name + ' » retirée.', 'info');
     }
 
     function updateImageCount() {
@@ -832,7 +881,7 @@
         var w = imageStage.clientWidth;
         var h = imageStage.clientHeight;
         if (!w || !h) { return null; } // hidden tab: sized again when shown
-        var size = Math.floor(Math.min(h * 0.8, w * 0.55, 380));
+        var size = Math.floor(Math.min(h * 0.82, w * 0.55, 460));
         var gap = Math.max(8, Math.round(size * 0.08));
         imageStage.style.setProperty('--tileSize', size + 'px');
         imageStage.style.setProperty('--tileGap', gap + 'px');
@@ -900,9 +949,35 @@
         img.src = entry.url;
         img.alt = entry.name;
         frame.appendChild(img);
+        var zoom = document.createElement('button');
+        zoom.type = 'button';
+        zoom.className = 'zoomBtn';
+        zoom.title = 'Afficher en grand';
+        zoom.setAttribute('aria-label', 'Afficher en grand');
+        frame.appendChild(zoom);
+        bindAction(frame, function() { openLightbox(entry); });
         imageStage.appendChild(frame);
         imageCaption.textContent = entry.name;
         imageCaption.hidden = !showImageNameToggle.checked;
+    }
+
+    function openLightbox(entry) {
+        lightboxImg.src = entry.url;
+        lightboxImg.alt = entry.name;
+        lightboxFrame.style.setProperty('--ratio', String(entry.ratio));
+        lightboxCaption.textContent = entry.name;
+        lightboxCaption.hidden = !showImageNameToggle.checked;
+        imageLightbox.classList.toggle('withCaption', showImageNameToggle.checked);
+        imageLightbox.hidden = false;
+        btnLightboxClose.focus();
+    }
+
+    function closeLightbox() {
+        if (imageLightbox.hidden) { return; }
+        imageLightbox.hidden = true;
+        lightboxImg.removeAttribute('src');
+        var zoom = imageStage.querySelector('.zoomBtn');
+        if (zoom) { zoom.focus(); }
     }
 
     function startImageDraw() {
@@ -925,6 +1000,7 @@
             return;
         }
 
+        closeLightbox();
         isImageRolling = true;
         setImageButtonsDisabled(true);
         imageCaption.hidden = true;
@@ -1139,6 +1215,11 @@
     bindAction(btnImageFiles, function() { imageFilesInput.click(); });
     bindAction(btnImageReset, resetImages);
     bindAction(btnImageClear, clearImages);
+    bindAction(btnLightboxClose, closeLightbox);
+    // A click on the dark backdrop closes; a click on the image itself does not.
+    imageLightbox.addEventListener('click', function(e) {
+        if (e.target === imageLightbox || e.target.className === 'lightboxFigure') { closeLightbox(); }
+    }, false);
 
     imageFolderInput.addEventListener('change', function() {
         importImageFiles(imageFolderInput.files);

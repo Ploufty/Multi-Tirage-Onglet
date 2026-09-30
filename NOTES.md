@@ -78,6 +78,12 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Animation : bande de tuiles qui défile et ralentit (easing), repères rouges au centre, la tuile tirée grossit puis l'image s'affiche en grand dans un cadre blanc au format de l'image (lisible en mode sombre, petites images agrandies), avec le nom du fichier en légende (masquable).
    - Options : durée 3-7 s, retirer l'image tirée, « Réinitialiser » (remet tout en jeu), « Vider ». Historique partagé (liseré rouge). Espace/Entrée lance le tirage. Animations réduites respectées (résultat direct).
    - Notice des formats acceptés dans l'onglet (bloc repliable) et dans le README.
+19. **Retours sur l'onglet Images + ajustement à la fenêtre** :
+   - Réglages de l'onglet Images plus compacts (texte plus petit, interrupteurs plus petits, cibles tactiles de 44 px conservées).
+   - Croix rouge sur chaque miniature pour retirer une image du tirage.
+   - Image tirée plus grande, avec une pastille « afficher en grand » en haut à droite (clic sur l'image aussi) : affichage plein écran de l'image au format d'origine, fermeture par la croix, Échap ou clic sur le fond.
+   - **Toute l'appli tient dans la fenêtre** dès 44rem de large et 30rem de haut (tablette, ENI, TBI, ordinateur) : plus de défilement, la zone de résultat prend la place restante, réglages et historique défilent dans leur colonne. Titre compact (sans sous-titre), marges resserrées sur écrans peu hauts. Historique en 3e colonne étroite dès 60rem (ENI/TBI 1024×768), sinon en dessous avec une hauteur fixe. Téléphone : défilement conservé.
+   - Dés : taille calculée avec 4 % de marge pour le rebond d'atterrissage ; ils sont nettement plus grands sur portable et TBI 1024×768 (ex. 84 → 139 px à 1366×768).
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 

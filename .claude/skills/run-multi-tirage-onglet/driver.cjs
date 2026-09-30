@@ -80,6 +80,58 @@ async function rollDice(page, style, count) {
   await page.waitForFunction(() => !document.getElementById('diceRollButton').disabled, null, { timeout: 4000 });
 }
 
+// Test media for the Images and Sounds tabs, generated once (no binary fixtures in the repo).
+const MEDIA = path.join(SHOTS, 'media');
+function testMedia() {
+  if (fs.existsSync(path.join(MEDIA, 'sons', 'un_chien.wav'))) return MEDIA;
+  fs.mkdirSync(path.join(MEDIA, 'images'), { recursive: true });
+  fs.mkdirSync(path.join(MEDIA, 'sons'), { recursive: true });
+  ['un_chat', 'une_maison', 'le_soleil'].forEach((n, i) => {
+    fs.copyFileSync(path.join(ROOT, 'assets/dice-hands', `${i + 1}.png`), path.join(MEDIA, 'images', `${n}.png`));
+  });
+  ['des_applaudissements', 'un_chien', 'la_pluie', 'une_porte'].forEach((n, k) => {
+    const rate = 8000; const len = rate; // 1 s, 16-bit mono
+    const b = Buffer.alloc(44 + len * 2);
+    b.write('RIFF', 0); b.writeUInt32LE(36 + len * 2, 4); b.write('WAVEfmt ', 8); b.writeUInt32LE(16, 16);
+    b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22); b.writeUInt32LE(rate, 24); b.writeUInt32LE(rate * 2, 28);
+    b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(len * 2, 40);
+    for (let t = 0; t < len; t++) b.writeInt16LE(Math.round(12000 * Math.sin(2 * Math.PI * (300 + 80 * k) * t / rate)), 44 + t * 2);
+    fs.writeFileSync(path.join(MEDIA, 'sons', `${n}.wav`), b);
+  });
+  fs.writeFileSync(path.join(MEDIA, 'sons', 'abime.mp3'), 'not audio');
+  return MEDIA;
+}
+const mediaFiles = (dir) => fs.readdirSync(path.join(testMedia(), dir)).map((f) => path.join(MEDIA, dir, f));
+
+async function drawImage(page) {
+  await page.act('.tabButton[data-tab=images]');
+  await page.setInputFiles('#imageFilesInput', mediaFiles('images'));
+  await page.waitForFunction(() => /3 images/.test(document.getElementById('imageCountBadge').textContent), null, { timeout: 8000 });
+  await page.act('#imageDrawButton');
+  await page.waitForSelector('.imageFinal img', { timeout: 10000 });
+}
+
+async function playSound(page) {
+  await page.act('.tabButton[data-tab=sounds]');
+  await page.setInputFiles('#soundFilesInput', mediaFiles('sons'));
+  // The broken file is rejected at import, except on iPad/iPhone where files cannot be probed (4 or 5 sounds).
+  await page.waitForFunction(() => /^[45] sons/.test(document.getElementById('soundCountBadge').textContent), null, { timeout: 12000 });
+  // On iPad/iPhone the shuffle may put the broken file first: it must say so, then Next works.
+  const isPlaying = () => !document.getElementById('soundAudio').paused;
+  await page.act('#soundPlayButton');
+  await page.waitForFunction(() => !document.getElementById('soundAudio').paused || /ne peut pas/.test(document.getElementById('soundStatusText').textContent), null, { timeout: 4000 });
+  if (!await page.evaluate(isPlaying)) {
+    await page.act('#soundNextButton');
+    await page.act('#soundPlayButton');
+    await page.waitForFunction(isPlaying, null, { timeout: 4000 });
+  }
+  // The label switches on the 'play' event, just after paused turns false.
+  await page.waitForFunction(() => document.getElementById('soundPlayButton').textContent !== 'Écouter le son', null, { timeout: 2000 }).catch(() => {});
+  const label = await page.textContent('#soundPlayButton');
+  if (await page.textContent('#soundCounter') === '1 / ' + (await page.textContent('#soundCounter')).split(' / ')[1]) await page.act('#soundNextButton');
+  return { label, counter: await page.textContent('#soundCounter') };
+}
+
 // Layout metrics measured in the page (dice tab must be visible for the dice metrics).
 function measure() {
   const vw = document.documentElement.clientWidth;
@@ -271,13 +323,39 @@ async function deviceMatrix(base) {
     await rollDice(page, 'hands', 6);
     const m = await page.evaluate(measure);
     const fold = await page.evaluate(bottomFromTop, 'diceRollButton');
-    const ok = nameFits && !m.hScroll && !m.wide.length && !m.outside && m.handsLoaded === 6 && !m.small.length && !page.errors.length && (phone || fold.fits);
+
+    // Images: draw one; the result stays inside its stage, Lancer reachable.
+    await drawImage(page);
+    const im = await page.evaluate(measure);
+    const imgFits = await page.evaluate(() => {
+      const s = document.getElementById('imageStage').getBoundingClientRect();
+      const f = document.querySelector('.imageFinal').getBoundingClientRect();
+      return f.width > 40 && f.left >= s.left - 1 && f.right <= s.right + 1 && f.bottom <= s.bottom + 1;
+    });
+    const imgFold = await page.evaluate(bottomFromTop, 'imageDrawButton');
+
+    // Sounds: import (1 broken file rejected), play, next; progress bar and nav reachable.
+    const snd = await playSound(page);
+    const sm = await page.evaluate(measure);
+    const sndFold = await page.evaluate(bottomFromTop, 'soundProgress');
+    const sndOk = snd.label === 'Pause' && /^2 \/ [45]$/.test(snd.counter);
+
+    const small = [...new Set([...m.small, ...im.small, ...sm.small])];
+    const ok = nameFits && !m.hScroll && !m.wide.length && !m.outside && m.handsLoaded === 6 && !small.length && !page.errors.length && (phone || fold.fits)
+      && imgFits && !im.hScroll && !im.wide.length && (phone || imgFold.fits)
+      && sndOk && !sm.hScroll && !sm.wide.length && (phone || sndFold.fits);
     report(ok, `${name} (${dev.viewport.width}x${dev.viewport.height}${dev.hasTouch ? ' touch' : ''})`,
       `die ${m.die}px x${m.rows} rows | Lancer bottom ${fold.bottom}/${dev.viewport.height}px${fold.fits ? '' : phone ? ' (phone: scroll ok)' : ' BELOW FOLD'}` +
       (nameFits ? '' : ' | long name overflows') + (m.hScroll || m.wide.length ? ` | overflow ${m.wide}` : '') +
-      (m.outside ? ` | ${m.outside} dice outside` : '') + (m.small.length ? ` | small ${m.small}` : '') +
+      (m.outside ? ` | ${m.outside} dice outside` : '') + (small.length ? ` | small ${small}` : '') +
+      (imgFits ? '' : ' | image outside its stage') + (im.hScroll || im.wide.length ? ` | images overflow ${im.wide}` : '') +
+      (imgFold.fits || phone ? '' : ` | images Lancer BELOW FOLD ${imgFold.bottom}`) +
+      (sndOk ? '' : ` | sound play failed (${snd.label}, ${snd.counter})`) + (sm.hScroll || sm.wide.length ? ` | sounds overflow ${sm.wide}` : '') +
+      (sndFold.fits || phone ? '' : ` | sounds bar BELOW FOLD ${sndFold.bottom}`) +
       (page.errors.length ? ` | errors ${page.errors}` : ''));
     await page.screenshot({ path: `${SHOTS}/device-${slug(name)}.png` });
+    await page.act('.tabButton[data-tab=images]');
+    await page.screenshot({ path: `${SHOTS}/device-${slug(name)}-images.png` });
     await page.context().close();
   }
 }

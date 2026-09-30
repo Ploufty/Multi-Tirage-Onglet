@@ -100,6 +100,12 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - « Défilement automatique » (bloc repliable sous Remélanger / Vider) : « Enchaîner les sons » + pause entre deux sons de 1 à 30 s (5 s par défaut), mémorisés. Décompte affiché (« Son suivant dans 3 s… »), le bouton devient « Arrêter l'enchaînement » ; Pause, Précédent/Suivant, Remélanger, Vider ou un changement d'onglet l'arrêtent.
    - Durée des tirages Noms et Images : **2 à 6 s, 3 s par défaut** (au lieu de 3 à 7 s, 5 s).
 
+23. **Passe de compatibilité « tout support »** (après la fusion de la PR n° 6) :
+   - L'outil de test vérifie désormais les **4 onglets** sur les 13 appareils émulés (image tirée contenue dans sa zone ; sons générés importés, lus, précédent/suivant ; chemin iPad/iPhone sans préchargement).
+   - Corrigé : cases de la barre de progression des sons à 44 px (elles faisaient 30 px, trop petites au doigt) ; « Son suivant » débordait de la carte sur tablette 712 px (texte maintenant sur deux lignes si besoin).
+   - Audit des fonctions CSS/JS face aux navigateurs minimum (Safari 14.5, Chrome 84, Firefox 75) : `aspect-ratio` y est ignoré. Simulé dans Chromium : haut-parleur, image tirée et image en grand restent correctes ; seules les miniatures devenaient irrégulières → hauteur fixe de repli (`@supports not (aspect-ratio: 1)`). `100dvh` a déjà un repli `100vh` ; `:focus-visible` ignoré sans effet.
+   - Limite : seul Chromium est disponible dans l'environnement ; Safari (WebKit) et Firefox ne sont pas testés en vrai. À faire à la main sur un iPad et dans Firefox.
+
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
 - **Pas de persistance des images/sons entre sessions** pour les futurs onglets Images/Sons : réimport à chaque fois accepté, pas d'IndexedDB prévu.

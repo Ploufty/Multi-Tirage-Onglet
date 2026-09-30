@@ -695,7 +695,15 @@ main.container {
 
 /* ---------- Onglet Sons ---------- */
 
-.optionsBar .settingsEye { align-self: center; }
+/* Bouton œil + texte : même pastille que les boutons ronds, élargie. */
+.optionsBar .settingsEye {
+    align-self: center;
+    width: auto;
+    gap: .5rem;
+    padding: 0 1rem 0 .8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
 .settingsEye[aria-pressed="false"] { color: var(--muted); }
 
 .autoPlayBody {

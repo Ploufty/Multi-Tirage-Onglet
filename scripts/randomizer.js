@@ -170,14 +170,19 @@
 
     // ---- Fullscreen ----
 
+    // SVG elements have no .hidden property: the attribute must be set directly.
+    function setIconHidden(icon, hidden) {
+        if (hidden) { icon.setAttribute('hidden', ''); } else { icon.removeAttribute('hidden'); }
+    }
+
     function isFullscreenActive() {
         return !!document.fullscreenElement || appEl.classList.contains('fakeFullscreen');
     }
 
     function updateFullscreenIcon() {
         var active = isFullscreenActive();
-        btnFullscreen.querySelector('.iconExpand').hidden = active;
-        btnFullscreen.querySelector('.iconCompress').hidden = !active;
+        setIconHidden(btnFullscreen.querySelector('.iconExpand'), active);
+        setIconHidden(btnFullscreen.querySelector('.iconCompress'), !active);
         btnFullscreen.title = active ? 'Quitter le plein écran (F)' : 'Plein écran (F)';
         btnFullscreen.setAttribute('aria-label', btnFullscreen.title);
         refreshSizes();
@@ -1575,9 +1580,9 @@
         var label = showSettings ? 'Masquer les réglages' : 'Afficher les réglages';
         btnSettings.setAttribute('aria-pressed', showSettings ? 'true' : 'false');
         btnSettings.title = label;
-        btnSettings.setAttribute('aria-label', label);
-        btnSettings.querySelector('.iconEye').hidden = !showSettings;
-        btnSettings.querySelector('.iconEyeOff').hidden = showSettings;
+        btnSettings.querySelector('.settingsEyeText').textContent = label;
+        setIconHidden(btnSettings.querySelector('.iconEye'), !showSettings);
+        setIconHidden(btnSettings.querySelector('.iconEyeOff'), showSettings);
         refreshSizes();
     }
 

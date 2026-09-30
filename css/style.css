@@ -631,6 +631,11 @@ main.container {
 .thumbRemove:hover::before { transform: scale(1.15); }
 .thumbRemove:focus-visible { outline-offset: -3px; }
 
+/* Navigateurs sans aspect-ratio (Safari < 15, Chrome < 88, Firefox < 89) : miniatures de hauteur fixe. */
+@supports not (aspect-ratio: 1) {
+    .imageThumbs li { height: 4.5rem; }
+}
+
 .formatNotice {
     font-size: .9rem;
     background: var(--surface-2);
@@ -921,7 +926,8 @@ main.container {
     gap: var(--gap);
 }
 
-.soundNav .btn { flex: 1 1 0; min-height: 3.25rem; padding-inline: .75rem; white-space: nowrap; }
+/* Le texte passe sur deux lignes plutôt que de déborder quand la colonne est étroite (tablette). */
+.soundNav .btn { flex: 1 1 0; min-width: 0; min-height: 3.25rem; padding-inline: .75rem; line-height: 1.15; }
 .soundNav .btn:disabled { opacity: .45; cursor: default; }
 
 .soundCounter {
@@ -948,7 +954,7 @@ main.container {
 
 .soundProgress button {
     width: 100%;
-    height: 1.9rem;
+    height: 2.75rem; /* cible tactile de 44 px (TBI, tablette) */
     padding: 0;
     color: var(--muted);
     background: var(--surface);
@@ -965,7 +971,7 @@ main.container {
 .soundProgress button:hover { border-color: var(--blue); }
 
 .soundProgress.compact { gap: 2px; }
-.soundProgress.compact button { height: 1.2rem; font-size: 0; }
+.soundProgress.compact button { font-size: 0; }
 .soundProgress.compact button::before { content: none; }
 
 /* ---------- Confettis ---------- */

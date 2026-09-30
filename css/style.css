@@ -110,7 +110,7 @@ main.container {
 
 .tabBar {
     display: flex;
-    flex: 0 1 30rem;
+    flex: 1 1 30rem;
     gap: .25rem;
     padding: .25rem;
     background: var(--surface);
@@ -138,10 +138,13 @@ main.container {
     background: var(--blue);
 }
 
+/* Options à droite des onglets, séparées par un trait vertical. */
 .optionsBar {
     display: flex;
     flex-wrap: wrap;
     gap: 0 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--control-border);
 }
 
 /* ---------- Grille : réglages | résultat | historique ---------- */
@@ -154,6 +157,9 @@ main.container {
 }
 
 .layout.noHistory { grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr); }
+.layout.noSettings { grid-template-columns: minmax(0, 1fr) minmax(13rem, 17rem); }
+.layout.noSettings.noHistory { grid-template-columns: minmax(0, 1fr); }
+.layout.noSettings .settingsPanel { display: none; }
 
 .tabPanel { display: contents; }
 
@@ -899,6 +905,8 @@ main.container {
 @media (max-width: 64rem) {
     .layout,
     .layout.noHistory { grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr); }
+    .layout.noSettings,
+    .layout.noSettings.noHistory { grid-template-columns: minmax(0, 1fr); }
     .historyPanel { grid-column: 1 / -1; }
     .historyList { max-height: 12rem; }
 }
@@ -907,11 +915,12 @@ main.container {
 
 @media (max-width: 44rem) {
     .layout,
-    .layout.noHistory { grid-template-columns: minmax(0, 1fr); }
+    .layout.noHistory,
+    .layout.noSettings { grid-template-columns: minmax(0, 1fr); }
     .toolbar { flex-direction: column; align-items: stretch; }
     .tabBar { flex-basis: auto; }
     .tabButton { padding: 0 .5rem; }
-    .optionsBar { justify-content: center; }
+    .optionsBar { justify-content: center; padding: .5rem 0 0; border-left: 0; border-top: 2px solid var(--control-border); }
     .hero { padding-block: 1rem; }
     #nameList { min-height: 9rem; }
     .drawButton { flex: 1 1 100%; }

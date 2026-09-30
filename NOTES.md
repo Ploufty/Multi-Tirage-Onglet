@@ -85,6 +85,10 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Titre « Tirage des sons » avec un **haut-parleur** dont les ondes suivent le volume réel (Web Audio `AnalyserNode`). Décision de l'utilisateur : **pas d'icône propre à chaque bruit**, juste le haut-parleur. Sur iPad/iPhone, pas d'analyse (router l'audio par Web Audio le couperait avec le bouton silencieux) : les ondes pulsent simplement.
    - Option « Afficher le nom du son » (décochée = jeu de devinette). Le son entre dans l'historique (liseré bleu) à sa première écoute. Clavier : Espace = écouter/pause, ← → = précédent/suivant. Le son s'arrête quand on change d'onglet.
    - Notices repliables dans l'onglet : « Mode d'emploi » et « Formats acceptés » (aussi dans le README).
+   - Pas de confettis dans l'onglet Sons : l'option « Confettis » y est masquée.
+20. **Barre d'onglets et colonne Réglages** :
+   - Les onglets s'étirent pour remplir leur ligne ; les options (Réglages, Historique, Confettis) restent à droite, séparées par un trait vertical (trait horizontal au-dessus sur téléphone). Une première version avec les options sur une ligne à part a été écartée : elle poussait le bouton Lancer sous le bas de l'écran sur les portables 1280×720 et 1366×768.
+   - Nouvelle option « Réglages » (cochée par défaut, mémorisée) : masque la colonne de gauche dans tous les onglets ; le résultat prend la place.
 
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 

@@ -16,6 +16,8 @@
     var confettiLayer = document.getElementById('confettiLayer');
     var removeDrawnToggle = document.getElementById('removeDrawnToggle');
     var showHistoryToggle = document.getElementById('showHistoryToggle');
+    var showSettingsToggle = document.getElementById('showSettingsToggle');
+    var confettiOption = document.getElementById('confettiOption');
     var confettiToggle = document.getElementById('confettiToggle');
     var historyPanel = document.getElementById('historyPanel');
     var layout = document.getElementById('layout');
@@ -135,6 +137,7 @@
         if (tabName === 'images' && !isImageRolling) {
             renderImageStage();
         }
+        confettiOption.hidden = tabName === 'sounds';
         if (tabName !== 'sounds' && !soundAudio.paused) {
             soundAudio.pause();
         }
@@ -1450,6 +1453,7 @@
         try {
             localStorage.setItem('randomizer_remove_drawn', removeDrawnToggle.checked ? '1' : '0');
             localStorage.setItem('randomizer_show_history', showHistoryToggle.checked ? '1' : '0');
+            localStorage.setItem('randomizer_show_settings', showSettingsToggle.checked ? '1' : '0');
             localStorage.setItem('randomizer_confetti_enabled', confettiToggle.checked ? '1' : '0');
         } catch (e) {}
     }
@@ -1504,6 +1508,12 @@
     function updateHistoryVisibility() {
         historyPanel.hidden = !showHistoryToggle.checked;
         layout.classList.toggle('noHistory', historyPanel.hidden);
+        refreshSizes();
+    }
+
+    // The settings column (left) can be hidden in every tab to give the result more room.
+    function updateSettingsVisibility() {
+        layout.classList.toggle('noSettings', !showSettingsToggle.checked);
         refreshSizes();
     }
 
@@ -1608,6 +1618,11 @@
         }, false);
     }
 
+    showSettingsToggle.addEventListener('change', function() {
+        persistOptions();
+        updateSettingsVisibility();
+    }, false);
+
     if (confettiToggle.addEventListener) {
         confettiToggle.addEventListener('change', persistOptions, false);
     }
@@ -1646,6 +1661,7 @@
         removeDrawnToggle.checked = localStorage.getItem('randomizer_remove_drawn') === '1';
         var savedShowHistory = localStorage.getItem('randomizer_show_history');
         showHistoryToggle.checked = savedShowHistory === null ? true : savedShowHistory === '1';
+        showSettingsToggle.checked = localStorage.getItem('randomizer_show_settings') !== '0';
         var savedConfetti = localStorage.getItem('randomizer_confetti_enabled');
         confettiToggle.checked = savedConfetti === null ? true : savedConfetti === '1';
         var savedHistory = localStorage.getItem('randomizer_history');
@@ -1687,6 +1703,7 @@
     updateImageCount();
     renderSounds();
     updateHistoryVisibility();
+    updateSettingsVisibility();
     renderHistory();
     setDiceStyle(diceStyle);
     buildCountRow();

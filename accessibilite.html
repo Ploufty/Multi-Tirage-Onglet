@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!-- Déclaration d'accessibilité d'Apps1D76. À mettre à jour à chaque audit, nouvel outil ou défaut connu.
+     Copie pour l'outil Tirage au sort : chemins adaptés à ce dépôt (css/, scripts/, icon.png). -->
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Déclaration d'accessibilité - Apps1D76</title>
+<meta name="description" content="Déclaration d'accessibilité du site Apps1D76 de la Mission Numérique Éducatif 76.">
+<meta name="theme-color" content="#000091">
+<link rel="icon" href="icon.png">
+<!-- UI de référence Apps1D76 (si l'outil rejoint le dépôt Apps1D76 : accueil/outil.css et accueil/outil.js) -->
+<link rel="stylesheet" href="css/outil.css">
+<script src="scripts/outil.js"></script>
+<style>
+  /* ===== Déclaration d'accessibilité : mise en page propre à cette page (variables de outil.css) ===== */
+  :root { --largeur: 68rem; --violet: #6a1bd1; --glass: rgba(255, 255, 255, .72); --glow: rgba(0, 0, 145, .18); }
+  [data-theme="dark"] { --violet: #b18cff; --glass: rgba(28, 28, 43, .72); --glow: rgba(133, 133, 246, .25); }
+
+  /* Lien d'évitement : masqué, visible au premier Tab (absent de outil.css) */
+  .skip { position: absolute; left: 1rem; top: -4rem; z-index: 20; padding: .7rem 1.2rem; border-radius: .6rem; background: var(--blue); color: var(--on-accent); font-weight: 700; text-decoration: none; }
+  .skip:focus { top: 1rem; }
+
+  /* Fond : taches de couleur floues + grille de points */
+  body { position: relative; isolation: isolate; }
+  .fond { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .fond i { position: absolute; width: 38rem; height: 38rem; border-radius: 50%; filter: blur(90px); opacity: .32; animation: flotte 18s ease-in-out infinite alternate; }
+  .fond i:nth-child(1) { background: #6b6bff; top: -12rem; left: -10rem; }
+  .fond i:nth-child(2) { background: #ff5a64; top: 20rem; right: -14rem; animation-delay: -6s; }
+  .fond i:nth-child(3) { background: #a970ff; bottom: -16rem; left: 25%; animation-delay: -12s; }
+  [data-theme="dark"] .fond i { opacity: .22; }
+  .fond::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 22px 22px; mask-image: linear-gradient(#000, transparent 70%); }
+  @keyframes flotte { to { transform: translate(4rem, 3rem) scale(1.15); } }
+
+  /* En-tête en verre dépoli, collant */
+  .outil-header { position: sticky; top: 0; z-index: 10; background: var(--glass); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); }
+
+  /* Héros */
+  .hero-decl { text-align: center; padding-block: clamp(2.5rem, 8vw, 5rem) 2rem; }
+  .pill { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .5rem; padding: .4rem 1rem; border-radius: 999px; font-size: .85rem; font-weight: 700; background: var(--glass); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .pill b { color: var(--blue); }
+  .hero-decl h1 { margin: 1.25rem auto .9rem; max-width: 18ch; font-size: clamp(2.2rem, 7vw, 4.2rem); line-height: 1.05; letter-spacing: -.035em; font-weight: 700; color: var(--blue); }
+  .grad { background: linear-gradient(100deg, var(--blue), var(--violet) 50%, var(--red)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero-decl > p { max-width: 38rem; margin: 0 auto; font-size: clamp(1rem, 2.2vw, 1.2rem); color: var(--muted); }
+  .cta { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.75rem; }
+  .cta .btn { text-decoration: none; padding-inline: 1.5rem; }
+  .btn-glow { box-shadow: 0 10px 30px -8px var(--glow), 0 0 0 1px rgba(255, 255, 255, .1) inset; }
+  .cta .btn-ghost { background: var(--glass); }
+
+  /* Chiffres clés et statut (grille « bento ») */
+  .bento { display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); margin-bottom: 1rem; }
+  @media (max-width: 48rem) {
+    .bento { grid-template-columns: 1fr; gap: .75rem; }
+    .bento .tuile:not(.statut) { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; }
+    .bento .chiffre { min-width: 3.5ch; font-size: 2.2rem; }
+    .bento .chiffre + p { margin: 0; }
+  }
+  .tuile { position: relative; padding: 1.4rem; border-radius: 1.4rem; background: var(--glass); border: 1px solid var(--border); box-shadow: var(--shadow); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .35s var(--spring), box-shadow .35s; }
+  .tuile:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -18px var(--glow); }
+  .statut { grid-column: 1 / -1; display: grid; gap: 1rem; align-items: center; grid-template-columns: auto 1fr; border-color: var(--orange); background: linear-gradient(120deg, var(--orange-soft), var(--glass) 60%); }
+  .statut .anneau { width: 5.5rem; height: 5.5rem; border-radius: 50%; display: grid; place-items: center; font-size: 2.2rem; background: var(--surface); box-shadow: 0 0 0 6px var(--orange-soft), 0 0 0 8px var(--orange); }
+  .statut h2 { font-size: 1.5rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .point { width: .8rem; height: .8rem; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 0 var(--orange); animation: pouls 2s infinite; }
+  @keyframes pouls { 70% { box-shadow: 0 0 0 .6rem transparent; } }
+  .statut p { color: var(--muted); margin-top: .3rem; }
+  .chiffre { font-size: 2.6rem; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+  .chiffre + p { margin-top: .4rem; color: var(--muted); font-size: .92rem; }
+  .a-definir { display: inline-block; padding: .1rem .6rem; border-radius: .5rem; background: var(--orange-soft); border: 1px dashed var(--orange); font-weight: 700; color: var(--text); }
+
+  /* Sommaire en pastilles, collant sous l'en-tête */
+  .puces-nav { position: sticky; top: 5.6rem; z-index: 5; margin: 1.5rem 0; }
+  .puces-nav ol { list-style: none; display: flex; gap: .5rem; overflow-x: auto; padding: .4rem; border-radius: 999px; background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); scrollbar-width: none; }
+  .puces-nav a { display: flex; align-items: center; min-height: 2.75rem; padding: 0 1rem; border-radius: 999px; white-space: nowrap; font-size: .9rem; font-weight: 700; color: var(--text); text-decoration: none; transition: background-color .2s, color .2s; }
+  .puces-nav a:hover { background: var(--blue); color: var(--on-accent); }
+
+  /* Sections */
+  .bloc { margin-bottom: 1rem; padding: clamp(1.25rem, 3vw, 2rem); }
+  main [id^="t-"] { scroll-margin-top: 10rem; }  /* titres visibles sous l’en-tête et le sommaire collants */
+  .bloc:hover { transform: none; }
+  .surtitre { display: block; font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--violet); margin-bottom: .3rem; }
+  .bloc h2 { font-size: clamp(1.35rem, 3vw, 1.8rem); letter-spacing: -.02em; margin-bottom: 1rem; }
+  .bloc h3 { font-size: 1rem; margin: 1.25rem 0 .5rem; }
+  .bloc p { line-height: 1.65; margin-bottom: .75rem; }
+  .bloc > :last-child { margin-bottom: 0; }
+  .liens { display: grid; gap: .6rem; list-style: none; }
+  .liens a { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.75rem; padding: .8rem 1.1rem; border-radius: 1rem; background: var(--surface-2); border: 1px solid var(--border); font-weight: 700; text-decoration: none; transition: border-color .2s, transform .3s var(--spring); }
+  .liens a::after { content: "↗"; flex: none; }
+  .liens a:hover { border-color: var(--blue); transform: translateX(4px); }
+  .puces { display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; }
+  .puces li { padding: .35rem .9rem; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font-weight: 700; font-size: .9rem; }
+
+  /* Mesures : tuiles avec icône en dégradé */
+  .mesures { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); list-style: none; }
+  .mesures li { display: flex; gap: .9rem; align-items: flex-start; padding: 1rem; border-radius: 1.1rem; background: var(--surface-2); border: 1px solid var(--border); transition: transform .35s var(--spring), border-color .2s; }
+  .mesures li:hover { transform: translateY(-3px) rotate(-.4deg); border-color: var(--blue); }
+  .mesures .ico { flex: none; display: grid; place-items: center; width: 2.8rem; height: 2.8rem; border-radius: .9rem; font-size: 1.35rem; background: linear-gradient(135deg, var(--blue-soft), var(--red-soft)); }
+  .mesures strong { display: block; margin-bottom: .15rem; }
+  .mesures span.txt { font-size: .9rem; color: var(--muted); }
+
+  /* Voies de recours : frise */
+  .frise { list-style: none; position: relative; display: grid; gap: 1.25rem; padding-left: 3.25rem; counter-reset: f; }
+  .frise::before { content: ""; position: absolute; left: 1.2rem; top: .5rem; bottom: .5rem; width: 3px; border-radius: 3px; background: linear-gradient(var(--blue), var(--violet), var(--red)); }
+  .frise li { position: relative; counter-increment: f; }
+  .frise li::before { content: counter(f); position: absolute; left: -3.25rem; top: -.2rem; width: 2.6rem; height: 2.6rem; display: grid; place-items: center; border-radius: 50%; font-weight: 700; background: var(--surface); border: 3px solid var(--blue); color: var(--blue); }
+  address { font-style: normal; margin-top: .6rem; padding: .9rem 1.1rem; border-radius: 1rem; background: var(--surface-2); border: 1px solid var(--border); line-height: 1.5; }
+
+  /* Carte contact en dégradé (couleurs fixes : texte blanc lisible en clair comme en sombre) */
+  .contact { color: #fff; border: 0; background: linear-gradient(135deg, #000091, #5b21b6 55%, #9d174d); box-shadow: 0 25px 50px -20px rgba(60, 20, 160, .55); overflow: clip; }
+  .contact .surtitre { color: #fff; opacity: .9; }
+  .contact a { color: #fff; }
+  .contact .a-definir { background: rgba(255, 255, 255, .15); border-color: #fff; color: #fff; }
+  .contact::after { content: "✉️"; position: absolute; right: -1rem; bottom: -2.5rem; font-size: 9rem; opacity: .12; transform: rotate(-15deg); pointer-events: none; }
+
+  /* Apparition au défilement (navigateurs récents ; coupée par les animations réduites) */
+  @supports (animation-timeline: view()) {
+    .apparait { animation: monte linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+    @keyframes monte { from { opacity: 0; transform: translateY(2rem) scale(.98); } }
+  }
+  @media (prefers-reduced-motion: reduce) { .fond i, .point, .apparait { animation: none !important; } }
+
+  /* Contraste renforcé : pas d'effet de verre, de dégradé ni de tache de couleur */
+  [data-contrast="high"] .fond { display: none; }
+  [data-contrast="high"] { --glass: var(--surface); }
+  [data-contrast="high"] .grad { background: none; color: var(--blue); }
+  [data-contrast="high"] .tuile, [data-contrast="high"] .puces-nav ol { border-width: 2px; backdrop-filter: none; }
+  [data-contrast="high"] .contact { background: #000091; }
+  [data-theme="dark"][data-contrast="high"] .contact { background: #000; border: 2px solid #fff; }
+
+  @media (max-width: 34rem) {
+    .statut { grid-template-columns: 1fr; justify-items: start; }
+    .puces-nav { top: 5rem; }
+  }
+  @media print { .fond, .puces-nav, .cta { display: none !important; } .outil-header { position: static; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="fond" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="outil-header">
+  <div class="container brandbar">
+    <a class="brand" href="index.html" aria-label="Retour à l'outil Tirage au sort">
+      <span class="back" aria-hidden="true">←</span>
+      <span><b>Apps1D<span>76</span></b><small>Mission Numérique Éducatif 76</small></span>
+    </a>
+    <div class="actions">
+      <button type="button" class="icon-btn" id="theme-toggle" aria-label="Activer le mode sombre">
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="tricolore" aria-hidden="true"></div>
+</header>
+
+<main class="container" id="contenu" tabindex="-1">
+  <section class="hero-decl" aria-labelledby="t-titre">
+    <span class="pill"><span aria-hidden="true">♿</span> <b>RGAA 4.1.2</b> · mise à jour le <time datetime="2026-09-30">30 septembre 2026</time></span>
+    <h1 id="t-titre">Déclaration <span class="grad">d'accessibilité</span></h1>
+    <p>Apps1D76 doit pouvoir être utilisé par tous les enseignants et tous les élèves. Voici où nous en sommes, et comment nous signaler un problème.</p>
+    <div class="cta">
+      <a class="btn btn-glow" href="#t-contact">Signaler un problème</a>
+      <a class="btn btn-ghost" href="#t-mesures">Voir ce qui est fait</a>
+    </div>
+  </section>
+
+  <div class="bento">
+    <section class="tuile statut apparait" aria-labelledby="t-etat">
+      <div class="anneau" aria-hidden="true">⚖️</div>
+      <div>
+        <h2 id="t-etat"><span class="point" aria-hidden="true"></span>État de conformité : non conforme</h2>
+        <p>Aucun audit n'a encore été réalisé : c'est la seule mention autorisée dans ce cas, même si le site suit les règles du RGAA (démarche de meilleur effort).</p>
+      </div>
+    </section>
+    <div class="tuile apparait"><p class="chiffre grad">8</p><p>mesures d'accessibilité en place sur l'accueil et les outils</p></div>
+    <div class="tuile apparait"><p class="chiffre grad">106</p><p>critères dans le RGAA 4.1.2, le référentiel suivi</p></div>
+    <div class="tuile apparait"><p class="chiffre grad">0</p><p>audit réalisé pour l'instant (prochaine étape)</p></div>
+  </div>
+
+  <nav class="puces-nav" aria-label="Sommaire">
+    <ol>
+      <li><a href="#t-engagement">Engagement</a></li>
+      <li><a href="#t-mesures">Mesures</a></li>
+      <li><a href="#t-non">Non accessible</a></li>
+      <li><a href="#t-etab">Établissement</a></li>
+      <li><a href="#t-contact">Contact</a></li>
+      <li><a href="#t-schema">Schéma pluriannuel</a></li>
+      <li><a href="#t-recours">Recours</a></li>
+    </ol>
+  </nav>
+
+  <section class="tuile bloc apparait" aria-labelledby="t-engagement">
+    <span class="surtitre">01 · Engagement</span>
+    <h2 id="t-engagement">Notre engagement</h2>
+    <p>
+      La Mission Numérique Éducatif 76 (DSDEN de la Seine-Maritime, académie de Normandie) s'engage à rendre ses services
+      numériques accessibles, conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.
+    </p>
+    <p>Cette déclaration s'applique au site <strong>Apps1D76</strong> et à tous les outils qu'il présente.</p>
+  </section>
+
+  <section class="tuile bloc apparait" aria-labelledby="t-mesures">
+    <span class="surtitre">02 · Mesures prises</span>
+    <h2 id="t-mesures">Ce qui est déjà fait</h2>
+    <ul class="mesures">
+      <li><span class="ico" aria-hidden="true">🧭</span><span><strong>Structure claire</strong><span class="txt">Langue déclarée, titres hiérarchisés, zones d'en-tête, de contenu et de pied de page.</span></span></li>
+      <li><span class="ico" aria-hidden="true">⌨️</span><span><strong>Tout au clavier</strong><span class="txt">Utilisable sans souris, lien « Aller au contenu ».</span></span></li>
+      <li><span class="ico" aria-hidden="true">🎯</span><span><strong>Focus visible</strong><span class="txt">On voit toujours où l'on se trouve.</span></span></li>
+      <li><span class="ico" aria-hidden="true">🌓</span><span><strong>Contrastes AA</strong><span class="txt">En mode clair comme en mode sombre.</span></span></li>
+      <li><span class="ico" aria-hidden="true">⚙️</span><span><strong>Panneau « Affichage »</strong><span class="txt">Thème, contraste renforcé, taille du texte, animations.</span></span></li>
+      <li><span class="ico" aria-hidden="true">🐢</span><span><strong>Animations réduites</strong><span class="txt">Le réglage du système est respecté.</span></span></li>
+      <li><span class="ico" aria-hidden="true">📱</span><span><strong>Tous les écrans</strong><span class="txt">Du téléphone (320 px) au TBI.</span></span></li>
+      <li><span class="ico" aria-hidden="true">👆</span><span><strong>Grandes zones tactiles</strong><span class="txt">Au moins 44 × 44 pixels.</span></span></li>
+    </ul>
+  </section>
+
+  <section class="tuile bloc apparait" aria-labelledby="t-non">
+    <span class="surtitre">03 · Contenus non accessibles</span>
+    <h2 id="t-non">Ce qui peut encore poser problème</h2>
+    <p>
+      Aucun défaut n'est connu à ce jour. En l'absence d'audit, des défauts non repérés peuvent toutefois exister,
+      en particulier dans les outils ajoutés récemment. Merci de nous les <a href="#t-contact">signaler</a>.
+    </p>
+  </section>
+
+  <section class="tuile bloc apparait" aria-labelledby="t-etab">
+    <span class="surtitre">04 · Établissement</span>
+    <h2 id="t-etab">Comment cette déclaration a été établie</h2>
+    <p>Cette déclaration a été établie le <time datetime="2026-09-30">30 septembre 2026</time>.</p>
+    <h3>Technologies utilisées</h3>
+    <ul class="puces"><li>HTML</li><li>CSS</li><li>JavaScript</li></ul>
+    <h3>Environnement de test</h3>
+    <p>
+      <span class="a-definir">À compléter</span> après les premiers tests : navigateurs et versions, aides techniques
+      (par exemple NVDA avec Firefox), outils de vérification (par exemple WAVE ou axe).
+    </p>
+    <h3>Pages concernées</h3>
+    <p>L'<a href="index.html">accueil</a>, cette déclaration et chaque outil présenté sur l'accueil.</p>
+  </section>
+
+  <section class="tuile bloc contact apparait" aria-labelledby="t-contact">
+    <span class="surtitre">05 · Retour d'information et contact</span>
+    <h2 id="t-contact">Un problème ? Dites-le nous.</h2>
+    <p>
+      Si vous n'arrivez pas à accéder à un contenu ou à un service, contactez la Mission Numérique Éducatif 76 :
+      nous vous orienterons vers une alternative accessible ou vous fournirons le contenu sous une autre forme.
+    </p>
+    <p><strong>Adresse de contact :</strong> <span class="a-definir">à définir</span></p>
+  </section>
+
+  <section class="tuile bloc apparait" aria-labelledby="t-schema">
+    <span class="surtitre">06 · Schéma pluriannuel</span>
+    <h2 id="t-schema">Schéma pluriannuel et plan d'action</h2>
+    <p>Le site relève du ministère de l'Éducation nationale, dont le schéma pluriannuel de mise en accessibilité et le plan d'action annuel sont publiés en ligne :</p>
+    <ul class="liens">
+      <li><a href="https://conformite.education.fr/schema_directeur.html">Schéma pluriannuel d'accessibilité numérique du ministère</a></li>
+      <li><a href="https://conformite.education.fr/plan_action.html">Plan d'action annuel de mise en accessibilité</a></li>
+      <li><a href="https://www.ac-normandie.fr/declaration-d-accessibilite-122110">Déclaration d'accessibilité de l'académie de Normandie</a></li>
+    </ul>
+  </section>
+
+  <section class="tuile bloc apparait" aria-labelledby="t-recours">
+    <span class="surtitre">07 · Voies de recours</span>
+    <h2 id="t-recours">Si vous n'obtenez pas de réponse</h2>
+    <p>
+      Si vous avez signalé un défaut d'accessibilité qui vous empêche d'accéder à un contenu ou à un service
+      et que vous n'avez pas obtenu de réponse satisfaisante, vous pouvez :
+    </p>
+    <ol class="frise">
+      <li>écrire un message au <a href="https://formulaire.defenseurdesdroits.fr/">Défenseur des droits</a> ;</li>
+      <li>contacter <a href="https://www.defenseurdesdroits.fr/saisir/delegues">le délégué du Défenseur des droits de votre région</a> ;</li>
+      <li>envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) :
+        <address>Défenseur des droits<br>Libre réponse 71120<br>75342 Paris CEDEX 07</address>
+      </li>
+    </ol>
+  </section>
+</main>
+
+<footer class="footer">Académie de Normandie · Seine-Maritime (76) · Mission Numérique Éducatif 76 · Accessibilité : non conforme</footer>
+</body>
+</html>

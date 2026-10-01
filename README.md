@@ -8,6 +8,7 @@ Pour l'historique complet du projet, les décisions prises et ce qu'il reste à 
 
 ```
 index.html                    Page principale
+accessibilite.html            Déclaration d'accessibilité Apps1D76 (liée depuis le pied de page)
 css/outil.css                 UI de référence Apps1D76 (copie à l'identique, ne pas modifier)
 scripts/outil.js              UI de référence Apps1D76 : thème clair/sombre, réglages partagés
 css/style.css                 Styles propres à l'outil (utilisent les variables de outil.css)

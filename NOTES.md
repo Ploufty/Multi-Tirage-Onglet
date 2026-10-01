@@ -106,6 +106,8 @@ Aucun build, aucune dépendance : s'ouvre en servant le dossier avec n'importe q
    - Audit des fonctions CSS/JS face aux navigateurs minimum (Safari 14.5, Chrome 84, Firefox 75) : `aspect-ratio` y est ignoré. Simulé dans Chromium : haut-parleur, image tirée et image en grand restent correctes ; seules les miniatures devenaient irrégulières → hauteur fixe de repli (`@supports not (aspect-ratio: 1)`). `100dvh` a déjà un repli `100vh` ; `:focus-visible` ignoré sans effet.
    - Limite : seul Chromium est disponible dans l'environnement ; Safari (WebKit) et Firefox ne sont pas testés en vrai. À faire à la main sur un iPad et dans Firefox.
 
+24. **Déclaration d'accessibilité** (fournie par l'utilisateur, déclaration commune Apps1D76, RGAA 4.1.2, « non conforme » faute d'audit) : ajoutée en `accessibilite.html`, chemins adaptés à ce dépôt (`css/outil.css`, `scripts/outil.js`, `icon.png`), retour vers l'outil. Style du lien « Aller au contenu » ajouté dans la page (absent de `outil.css`). Lien « Accessibilité : non conforme » dans le pied de page de l'outil (obligatoire sur chaque page). Champs encore « à définir » dans le texte de l'utilisateur : adresse de contact et environnement de test.
+
 ## Décisions explicites de l'utilisateur (ne pas revenir dessus sans lui redemander)
 
 - **Pas de persistance des images/sons entre sessions** pour les futurs onglets Images/Sons : réimport à chaque fois accepté, pas d'IndexedDB prévu.

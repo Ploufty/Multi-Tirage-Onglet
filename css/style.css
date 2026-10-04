@@ -1,0 +1,1188 @@
+/* ===================== STYLES DE L'OUTIL =====================
+   S'appuient sur les variables de l'UI de référence (css/outil.css). */
+
+:root {
+    --largeur: 90rem;            /* large pour profiter des grands écrans et du TBI */
+    --die-ink: #1e1e2f;          /* les dés restent blancs à encre sombre, même en mode sombre */
+    --gap: clamp(.75rem, 1.6vw, 1.25rem);
+}
+
+[hidden] { display: none !important; }
+
+/* Contours des commandes (boutons, onglets, champ, interrupteurs, curseur) : la bordure de
+   référence est trop pâle pour une commande (1,25:1 en clair, 1,4:1 en sombre). Ils reçoivent un
+   contraste de 3:1 minimum avec le fond (WCAG 1.4.11). En sombre, les boutons ont aussi un fond
+   légèrement surélevé. Le mode « contraste renforcé » garde ses propres couleurs. */
+:root { --control-border: #88889f; }
+[data-theme="dark"] { --control-border: #6e6e92; }
+[data-contrast="high"] { --control-border: var(--border); }
+
+[data-theme="dark"] .pillBtn:not(.active),
+[data-theme="dark"] .btn-ghost,
+[data-theme="dark"] .icon-btn {
+    background: var(--surface-2);
+}
+
+.pillBtn:not(.active):not(:hover),
+.btn-ghost:not(:hover),
+.icon-btn:not(:hover),
+textarea:not(:focus) {
+    border-color: var(--control-border);
+}
+
+.toggle input:not(:checked) + .toggle-slider { background: var(--control-border); }
+
+button, input[type="range"] { touch-action: manipulation; }
+
+/* ---------- Conteneur principal (cible du plein écran) ---------- */
+
+#app {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+}
+
+#app:fullscreen,
+#app.fakeFullscreen {
+    overflow-y: auto;
+    --largeur: none;
+}
+
+#app.fakeFullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+}
+
+/* En plein écran, on garde la barre d'actions (pour en sortir) et on libère la place du titre. */
+#app:fullscreen .hero,
+#app.fakeFullscreen .hero,
+#app:fullscreen .footer,
+#app.fakeFullscreen .footer { display: none; }
+
+#app:fullscreen main,
+#app.fakeFullscreen main { padding-block: 1rem; }
+
+main.container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    padding-block: var(--gap) 2rem;
+}
+
+.icon-btn { color: var(--blue); }
+
+/* ---------- Notification ---------- */
+
+.notifBanner {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    z-index: 70;
+    max-width: calc(100% - 2rem);
+    padding: .7rem 1.4rem;
+    font-weight: 700;
+    color: var(--on-accent);
+    background: var(--blue);
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translate(-50%, -200%);
+    transition: transform .35s var(--spring), opacity .2s;
+    pointer-events: none;
+}
+
+.notifBanner.visible { opacity: 1; transform: translate(-50%, 0); }
+.notifBanner.success { background: var(--green); }
+.notifBanner.error { background: var(--red); }
+
+/* ---------- Onglets et options ---------- */
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1.5rem;
+}
+
+.tabBar {
+    display: flex;
+    flex: 1 1 30rem;
+    gap: .25rem;
+    padding: .25rem;
+    background: var(--surface);
+    border: 1px solid var(--control-border);
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+}
+
+.tabButton {
+    flex: 1;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: background-color .2s, color .2s;
+}
+
+.tabButton:hover { color: var(--blue); }
+
+.tabButton.active {
+    color: var(--on-accent);
+    background: var(--blue);
+}
+
+/* Options à droite des onglets, séparées par un trait vertical. */
+.optionsBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--control-border);
+}
+
+/* ---------- Grille : réglages | résultat | historique ---------- */
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr) minmax(13rem, 17rem);
+    gap: var(--gap);
+    align-items: stretch;
+}
+
+.layout.noHistory { grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr); }
+.layout.noSettings { grid-template-columns: minmax(0, 1fr) minmax(13rem, 17rem); }
+.layout.noSettings.noHistory { grid-template-columns: minmax(0, 1fr); }
+.layout.noSettings .settingsPanel { display: none; }
+
+.tabPanel { display: contents; }
+
+.layout .card {
+    margin: 0;
+    padding: clamp(1rem, 1.8vw, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    min-width: 0;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.panelHeader h2 {
+    font-size: 1.2rem;
+    color: var(--blue);
+}
+
+.badge {
+    padding: .2rem .8rem;
+    color: var(--green);
+    background: var(--green-soft);
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.hint { margin: 0; }
+
+.linkButton {
+    min-height: 2.75rem;
+    padding: 0 .25rem;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    font-size: .9rem;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.linkButton:hover { color: var(--blue); }
+
+.btnDanger { color: var(--red); }
+.btnDanger:hover { border-color: var(--red); }
+
+/* ---------- Onglet Noms ---------- */
+
+#nameList {
+    flex: 1 1 auto;
+    min-height: 12rem;
+    resize: vertical;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.settingsPanel .btn-row .btn { flex: 1 1 auto; padding-inline: 1rem; white-space: nowrap; }
+
+.resultCard {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    min-height: clamp(11rem, 36vh, 34rem);
+    padding: clamp(1rem, 2vw, 1.5rem);
+    text-align: center;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.statusText {
+    color: var(--muted);
+    font-weight: 700;
+}
+
+#resultName {
+    max-width: 100%;
+    color: var(--text);
+    font-size: clamp(2.2rem, 7vw, 6rem);
+    line-height: 1.15;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+#app:fullscreen #resultName,
+#app.fakeFullscreen #resultName { font-size: clamp(3rem, 10vw, 9rem); }
+
+#resultName.rolling { color: var(--blue); }
+#resultName.winner { animation: popWinner .45s var(--spring); }
+
+@keyframes popWinner {
+    0% { transform: scale(.86); opacity: .7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: var(--gap);
+}
+
+.diceControls { justify-content: flex-end; }
+
+.speedBox {
+    flex: 1 1 14rem;
+    padding: .9rem 1.2rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.speedHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.speedHeader label { margin: 0; font-size: 1rem; }
+.speedHeader strong { color: var(--blue); font-size: 1.2rem; white-space: nowrap; }
+.autoPlayBody .speedHeader { gap: .5rem; }
+.autoPlayBody .speedHeader label { font-size: .9rem; }
+
+.rangeLabels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: .8rem;
+}
+
+/* Curseur : piste fine, pouce rond, zone tactile de 44 px. */
+.speedBox input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2.75rem;
+    background: transparent;
+    cursor: pointer;
+}
+
+.speedBox input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: var(--control-border); }
+.speedBox input[type="range"]::-moz-range-track { height: 6px; border-radius: 999px; background: var(--control-border); }
+
+.speedBox input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: calc(3px - .7rem);
+    border-radius: 50%;
+    background: var(--blue);
+    border: 3px solid var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.speedBox input[type="range"]::-moz-range-thumb {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--blue);
+    border: 3px solid var(--surface);
+}
+
+/* Gros bouton d'action principal, même place dans les deux onglets. */
+.drawButton {
+    flex: 0 1 auto;
+    min-width: 12rem;
+    min-height: 4.5rem;
+    padding: .75rem 2rem;
+    font-size: 1.3rem;
+    gap: .8rem;
+}
+
+.drawButton:disabled {
+    opacity: .6;
+    cursor: default;
+    transform: none;
+}
+
+.dieButton {
+    position: relative;
+    display: block;
+    flex: none;
+    width: 2.2rem;
+    height: 2.2rem;
+    background: var(--on-accent);
+    border-radius: .55rem;
+}
+
+.dieButton i {
+    position: absolute;
+    width: 22%;
+    height: 22%;
+    background: var(--blue);
+    border-radius: 50%;
+}
+
+.dieButton i:nth-child(1) { left: 16%; top: 16%; }
+.dieButton i:nth-child(2) { right: 16%; top: 16%; }
+.dieButton i:nth-child(3) { left: 39%; top: 39%; }
+.dieButton i:nth-child(4) { left: 16%; bottom: 16%; }
+.dieButton i:nth-child(5) { right: 16%; bottom: 16%; }
+
+/* ---------- Onglet Dés : réglages ---------- */
+
+.diceGroup { display: flex; flex-direction: column; gap: .5rem; }
+
+.diceGroupLabel {
+    color: var(--muted);
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.pillRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.pillBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    padding: 0 .6rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    font-weight: 700;
+    transition: border-color .2s, transform .25s var(--spring);
+}
+
+.pillBtn:hover { border-color: var(--blue); }
+
+.pillBtn.active {
+    color: var(--on-accent);
+    background: var(--blue);
+    border-color: var(--blue);
+}
+
+.pillBtn.iconPill {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: .9rem;
+    font-size: 1.4rem;
+}
+
+.miniPipFace,
+.miniHand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+}
+
+.miniPipFace .pipGrid { width: 100%; height: 100%; }
+
+/* Icône « Doigts » : contour seul (icon.png, généré par prepare-hands.cjs) utilisé comme pochoir,
+   rempli avec la couleur du texte du bouton, comme les points et le « 5 » à côté. */
+.miniHand {
+    width: 2.2rem;
+    height: 2.2rem;
+    background: currentColor;
+    -webkit-mask: url(../assets/dice-hands/icon.png) center / contain no-repeat;
+    mask: url(../assets/dice-hands/icon.png) center / contain no-repeat;
+}
+
+
+/* ---------- Onglet Dés : résultat ---------- */
+
+/* La hauteur de la zone fixe la taille maximale des dés (calculée en JS, --dieSize). */
+.diceFaces {
+    --dieSize: 6rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: clamp(.6rem, 2vw, 1.5rem);
+    width: 100%;
+    height: clamp(9rem, 33vh, 30rem);
+    box-sizing: border-box;
+}
+
+#app:fullscreen .diceFaces,
+#app.fakeFullscreen .diceFaces { height: clamp(12rem, 52vh, 60rem); }
+
+.dieFace {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: var(--dieSize);
+    height: var(--dieSize);
+    color: var(--die-ink);
+    background: #fff;
+    border: max(2px, calc(var(--dieSize) * .03)) solid var(--blue);
+    border-radius: calc(var(--dieSize) * .18);
+    box-shadow: 0 calc(var(--dieSize) * .06) calc(var(--dieSize) * .14) rgba(0, 0, 60, .22);
+    font-size: calc(var(--dieSize) * .46);
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Avant le premier lancer : « ? » discret. */
+.dieFace.waiting { color: #b4b4c6; }
+
+.dieFace.rolling { animation: dieShake .3s ease-in-out infinite; }
+.dieFace.dropping { animation: dieDrop 550ms var(--spring) both; }
+.dieFace.landed { animation: dieLanded .4s ease-out; }
+
+@keyframes dieDrop {
+    0% { transform: translateY(-40%) scale(.7); opacity: 0; }
+    55% { transform: translateY(4%) scale(1.05); opacity: 1; }
+    100% { transform: none; }
+}
+
+@keyframes dieLanded {
+    0% { transform: scale(.88); }
+    60% { transform: scale(1.08); }
+    100% { transform: none; }
+}
+
+@keyframes dieShake {
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+}
+
+.pipGrid {
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    grid-template-areas: "tl . tr" "ml c mr" "bl . br";
+    width: 72%;
+    height: 72%;
+}
+
+.pip {
+    place-self: center;
+    width: 68%;
+    height: 68%;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.pip-tl { grid-area: tl; }
+.pip-tr { grid-area: tr; }
+.pip-ml { grid-area: ml; }
+.pip-mr { grid-area: mr; }
+.pip-bl { grid-area: bl; }
+.pip-br { grid-area: br; }
+.pip-c { grid-area: c; }
+
+/* Mains : PNG 600×600 déjà cadrés avec une marge de 6 % (voir assets/dice-hands/README.md).
+   Remplies de blanc et cernées de noir, elles restent lisibles sur le bouton bleu et en mode sombre. */
+.handImg {
+    display: block;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.dieFace .handImg { width: 92%; height: 92%; }
+
+/* La ligne Total garde sa place même masquée : rien ne saute au premier lancer
+   et le bouton Lancer ne descend pas. */
+#diceTotal[hidden] { display: block !important; visibility: hidden; }
+
+.diceTotal {
+    font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+    font-weight: 700;
+}
+
+.diceTotal strong {
+    color: var(--blue);
+    font-size: 1.4em;
+}
+
+/* ---------- Onglet Images : réglages ---------- */
+
+/* Réglages plus compacts : texte plus petit, cibles tactiles de 44 px conservées. */
+#tabPanel-images .settingsPanel { gap: .6rem; }
+#tabPanel-images .settingsPanel .btn { font-size: .9rem; padding-inline: .75rem; }
+#tabPanel-images .toggle-wrap { gap: .6rem; font-size: .9rem; }
+#tabPanel-images .toggle { width: 2.5rem; height: 1.4rem; }
+#tabPanel-images .toggle-slider::before { width: 1.05rem; height: 1.05rem; left: .175rem; top: .175rem; }
+#tabPanel-images .toggle input:checked + .toggle-slider::before { transform: translateX(1.1rem); }
+#tabPanel-images .formatNotice { font-size: .85rem; }
+
+.importReport { margin: 0; font-size: .85rem; }
+.importReport ul { margin: .35rem 0 0 1.1rem; overflow-wrap: anywhere; }
+.importReport p + p { margin-top: .25rem; }
+
+.imageThumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+    gap: .4rem;
+    max-height: 13rem;
+    flex: none;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.imageThumbs li {
+    position: relative;
+    aspect-ratio: 1;
+    padding: 2px;
+    background: #fff; /* images transparentes lisibles, même en mode sombre */
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+}
+
+.imageThumbs img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.imageThumbs li.drawn img { opacity: .3; }
+
+/* Petite croix rouge pour retirer une image : pastille de 22 px dans le coin,
+   zone tactile de 44 px (le coin haut droit de la miniature). */
+.thumbRemove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0 .5rem 0 0;
+}
+
+.thumbRemove::before,
+.thumbRemove::after {
+    content: "";
+    position: absolute;
+    top: .2rem;
+    right: .2rem;
+}
+
+.thumbRemove::before {
+    width: 1.35rem;
+    height: 1.35rem;
+    background: var(--red);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+    transition: transform .2s var(--spring);
+}
+
+/* La croix blanche, dessinée par un masque SVG au centre de la pastille. */
+.thumbRemove::after {
+    width: 1.35rem;
+    height: 1.35rem;
+    background: #fff;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 8l8 8M16 8l-8 8' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 8l8 8M16 8l-8 8' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+
+.thumbRemove:hover::before { transform: scale(1.15); }
+.thumbRemove:focus-visible { outline-offset: -3px; }
+
+/* Navigateurs sans aspect-ratio (Safari < 15, Chrome < 88, Firefox < 89) : miniatures de hauteur fixe. */
+@supports not (aspect-ratio: 1) {
+    .imageThumbs li { height: 4.5rem; }
+}
+
+.formatNotice {
+    font-size: .9rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: .6rem;
+}
+
+.formatNotice summary {
+    min-height: 2.75rem;
+    padding: .6rem .9rem;
+    color: var(--blue);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.formatNotice dl,
+.formatNotice ul { padding: 0 .9rem .8rem; }
+.formatNotice ul { padding-left: 2rem; color: var(--muted); }
+.formatNotice li + li { margin-top: .25rem; }
+.formatNotice dt { font-weight: 700; }
+.formatNotice dt::before { content: "● "; }
+.formatNotice dt.ok::before { color: var(--green); }
+.formatNotice dt.warn::before { color: var(--orange); }
+.formatNotice dt.no::before { color: var(--red); }
+.formatNotice dd { margin: 0 0 .5rem 1.1rem; }
+.formatNotice code { font-size: .85em; }
+
+/* ---------- Onglet Images : carrousel et résultat ---------- */
+
+.imageStage {
+    --tileSize: 10rem;
+    --tileGap: .8rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: clamp(9rem, 40vh, 30rem);
+    overflow: hidden;
+}
+
+#app:fullscreen .imageStage,
+#app.fakeFullscreen .imageStage { height: clamp(12rem, 58vh, 60rem); }
+
+/* Bords estompés et repères rouges au centre : l'image sous les flèches est celle tirée. */
+.imageStage.carousel {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+}
+
+.imageStage.carousel::before,
+.imageStage.carousel::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    z-index: 2;
+    border: .8rem solid transparent;
+    transform: translateX(-50%);
+}
+
+.imageStage.carousel::before { top: calc(50% - var(--tileSize) / 2 - 1.3rem); border-top-color: var(--red); }
+.imageStage.carousel::after { bottom: calc(50% - var(--tileSize) / 2 - 1.3rem); border-bottom-color: var(--red); }
+
+.imageStrip {
+    position: absolute;
+    top: calc(50% - var(--tileSize) / 2);
+    left: 0;
+    display: flex;
+    gap: var(--tileGap);
+    will-change: transform;
+}
+
+.imageTile {
+    flex: none;
+    width: var(--tileSize);
+    height: var(--tileSize);
+    padding: calc(var(--tileSize) * .04);
+    background: #fff;
+    border: max(2px, calc(var(--tileSize) * .02)) solid var(--border);
+    border-radius: calc(var(--tileSize) * .1);
+    box-shadow: 0 calc(var(--tileSize) * .03) calc(var(--tileSize) * .08) rgba(0, 0, 60, .18);
+    transition: transform .35s var(--spring), border-color .2s;
+}
+
+.imageTile img,
+.imageFinal img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+}
+
+.imageTile.selected { border-color: var(--blue); transform: scale(1.1); }
+
+/* Résultat : cadre blanc au format de l'image, qui agrandit aussi les petites images. */
+.imageFinal {
+    position: relative;
+    height: 100%;
+    max-width: 100%;
+    padding: clamp(.25rem, .6vw, .5rem);
+    cursor: zoom-in;
+    background: #fff;
+    border: 3px solid var(--blue);
+    border-radius: var(--radius);
+    box-shadow: 0 .4rem 1.2rem rgba(0, 0, 60, .22);
+}
+
+.imageFinal.winner { animation: popWinner .45s var(--spring); }
+
+/* Pastille « afficher en grand », en haut à droite de l'image tirée. */
+.zoomBtn {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: #fff;
+    background: #000091; /* fixe : le cadre reste blanc dans les deux thèmes */
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 .15rem .5rem rgba(0, 0, 60, .35);
+    transition: transform .25s var(--spring);
+}
+
+.zoomBtn:hover { transform: scale(1.1); }
+.zoomBtn::before {
+    content: "";
+    width: 1.25rem;
+    height: 1.25rem;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") center / 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+
+/* Image en grand : couvre toute la fenêtre (ou l'écran en plein écran). */
+.imageLightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(10, 10, 25, .88);
+    animation: lightboxIn .2s ease-out;
+}
+
+.lightboxFigure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    width: 100%;
+    height: 100%;
+}
+
+/* Le plus grand cadre au format de l'image qui tient dans la fenêtre (petites images agrandies). */
+.lightboxFrame {
+    --ratio: 1;
+    --maxH: calc(100vh - 2rem);
+    width: min(100%, calc(var(--maxH) * var(--ratio)));
+    aspect-ratio: var(--ratio);
+    max-height: var(--maxH);
+    padding: clamp(.3rem, 1vw, .75rem);
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 .5rem 2rem rgba(0, 0, 0, .5);
+}
+
+.withCaption .lightboxFrame { --maxH: calc(100vh - 2rem - clamp(2.2rem, 6vw, 5rem)); }
+
+.lightboxFrame img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+.lightboxFigure .imageCaption { color: #fff; font-size: clamp(1.6rem, 5vw, 4rem); text-align: center; }
+
+.lightboxClose {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: var(--blue);
+}
+
+@keyframes lightboxIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.imageCaption {
+    max-width: 100%;
+    font-size: clamp(1.4rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+/* ---------- Onglet Sons ---------- */
+
+/* Bouton œil + texte : même pastille que les boutons ronds, élargie. */
+.optionsBar .settingsEye {
+    align-self: center;
+    width: auto;
+    gap: .5rem;
+    padding: 0 1rem 0 .8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.settingsEye[aria-pressed="false"] { color: var(--muted); }
+
+.autoPlayBody {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 0 .9rem .9rem;
+}
+
+.autoPlayBody .speedBox { flex: none; padding: .6rem .9rem; background: var(--surface); }
+
+.formatNotice ol { padding: 0 .9rem .5rem 2rem; }
+.formatNotice ol li + li { margin-top: .35rem; }
+.formatNotice .noticeKeys { margin: 0; padding: 0 .9rem .8rem; color: var(--muted); }
+
+.soundCard { gap: .6rem; }
+
+/* Haut-parleur : les ondes suivent le volume du son (--level, 0 à 1, calculé en JS).
+   Sans mesure possible (iPad, iPhone), elles pulsent simplement pendant la lecture. */
+.soundSpeaker {
+    --level: 0;
+    width: clamp(6rem, 16vh, 11rem);
+    aspect-ratio: 1;
+    color: var(--blue);
+    transform: scale(calc(1 + var(--level) * .12));
+}
+
+.soundSpeaker svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.speakerBody { fill: currentColor; }
+.speakerWave { opacity: .18; transition: opacity .2s; }
+
+.soundSpeaker.metered .w1 { opacity: max(.18, calc(var(--level) * 3)); }
+.soundSpeaker.metered .w2 { opacity: max(.18, calc((var(--level) - .25) * 3)); }
+.soundSpeaker.metered .w3 { opacity: max(.18, calc((var(--level) - .5) * 3)); }
+
+.soundSpeaker.playing:not(.metered) .speakerWave { animation: speakerWave 1.2s ease-in-out infinite; }
+.soundSpeaker.playing:not(.metered) .w2 { animation-delay: .15s; }
+.soundSpeaker.playing:not(.metered) .w3 { animation-delay: .3s; }
+
+@keyframes speakerWave {
+    0%, 100% { opacity: .18; }
+    40% { opacity: 1; }
+}
+
+.soundTitle {
+    margin: 0;
+    color: var(--blue);
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    line-height: 1.1;
+}
+
+.soundName {
+    max-width: 100%;
+    font-size: clamp(1.3rem, 3.2vw, 2.4rem);
+    font-style: italic;
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.soundPlayButton { margin-top: .4rem; }
+.soundPlayButton.isPlaying { background: var(--red); border-color: var(--red); }
+
+.soundNav {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+}
+
+/* Le texte passe sur deux lignes plutôt que de déborder quand la colonne est étroite (tablette). */
+.soundNav .btn { flex: 1 1 0; min-width: 0; min-height: 3.25rem; padding-inline: .75rem; line-height: 1.15; }
+.soundNav .btn:disabled { opacity: .45; cursor: default; }
+
+.soundCounter {
+    flex: none;
+    min-width: 4.5rem;
+    color: var(--blue);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Barre de progression : une case par son (courant en bleu, déjà écoutés cochés). */
+.soundProgress {
+    display: flex;
+    gap: .3rem;
+    padding: .3rem;
+    list-style: none;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+}
+
+.soundProgress li { flex: 1 1 0; min-width: 0; }
+
+.soundProgress button {
+    width: 100%;
+    height: 2.75rem; /* cible tactile de 44 px (TBI, tablette) */
+    padding: 0;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--control-border);
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    overflow: hidden;
+}
+
+.soundProgress button.listened { color: var(--green); background: var(--green-soft); border-color: var(--green); }
+.soundProgress button.listened::before { content: "✓ "; }
+.soundProgress button.current { color: var(--on-accent); background: var(--blue); border-color: var(--blue); }
+.soundProgress button:hover { border-color: var(--blue); }
+
+.soundProgress.compact { gap: 2px; }
+.soundProgress.compact button { font-size: 0; }
+.soundProgress.compact button::before { content: none; }
+
+/* ---------- Confettis ---------- */
+
+#confettiLayer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 50;
+}
+
+.confetti {
+    position: absolute;
+    opacity: 0;
+    animation-name: confettiFall;
+    animation-timing-function: cubic-bezier(.22, .68, .32, 1);
+    animation-fill-mode: forwards;
+}
+
+.confetti.round { border-radius: 50%; }
+.confetti.square { border-radius: 3px; }
+
+@keyframes confettiFall {
+    0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.4); }
+    12% { opacity: 1; transform: translate(calc(var(--peakX) * .35), calc(var(--peakY) * .7)) rotate(calc(var(--rot) * .3)) scale(1); }
+    50% { opacity: 1; transform: translate(var(--peakX), var(--peakY)) rotate(calc(var(--rot) * .6)) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(.7); }
+}
+
+/* ---------- Historique ---------- */
+
+.historyList {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    max-height: 26rem;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.historyList li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .5rem .8rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    border-radius: .6rem;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.historyList li[data-kind="dice"] { border-left-color: var(--orange); }
+.historyList li[data-kind="images"] { border-left-color: var(--red); }
+.historyList li[data-kind="sounds"] { border-left-color: var(--blue); }
+
+.historyList li:first-child:not(.historyEmpty) { border-color: var(--blue); border-left-width: 4px; }
+.historyList li:first-child[data-kind="names"] { border-left-color: var(--green); }
+.historyList li:first-child[data-kind="dice"] { border-left-color: var(--orange); }
+.historyList li:first-child[data-kind="images"] { border-left-color: var(--red); }
+.historyList li:first-child[data-kind="sounds"] { border-left-color: var(--blue); }
+
+.historyName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historyTime {
+    flex: none;
+    color: var(--muted);
+    font-size: .8rem;
+    font-weight: 400;
+}
+
+.historyList .historyEmpty {
+    justify-content: center;
+    color: var(--muted);
+    font-weight: 400;
+    font-style: italic;
+    border-left-color: var(--border);
+}
+
+/* 3 colonnes : l'historique suit la hauteur des autres cartes au lieu de l'imposer
+   (sinon, en se remplissant, il pousse le bouton Lancer hors de l'écran) et sa liste défile. */
+@media (min-width: 64.01rem) {
+    .historyPanel { height: 0; min-height: 100%; }
+    .historyList { min-height: 0; max-height: none; }
+}
+
+/* ---------- Écrans moyens : historique sous les deux colonnes ---------- */
+
+@media (max-width: 64rem) {
+    .layout,
+    .layout.noHistory { grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr); }
+    .layout.noSettings,
+    .layout.noSettings.noHistory { grid-template-columns: minmax(0, 1fr); }
+    .historyPanel { grid-column: 1 / -1; }
+    .historyList { max-height: 12rem; }
+}
+
+/* ---------- Petits écrans : une seule colonne ---------- */
+
+@media (max-width: 44rem) {
+    .layout,
+    .layout.noHistory,
+    .layout.noSettings { grid-template-columns: minmax(0, 1fr); }
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .tabBar { flex-basis: auto; }
+    .tabButton { padding: 0 .5rem; }
+    .optionsBar { justify-content: center; padding: .5rem 0 0; border-left: 0; border-top: 2px solid var(--control-border); }
+    .hero { padding-block: 1rem; }
+    #nameList { min-height: 9rem; }
+    .drawButton { flex: 1 1 100%; }
+    .diceFaces { height: clamp(10rem, 72vw, 22rem); }
+    .imageStage { height: clamp(10rem, 72vw, 22rem); }
+    .soundNav { flex-wrap: wrap; }
+    .soundNav .btn { flex-basis: 40%; font-size: .95rem; }
+    .soundCounter { order: -1; flex-basis: 100%; }
+}
+
+/* Écrans peu hauts (portable, TBI 1024×768, tablette couchée) : titre compact
+   pour que le bouton Lancer reste visible sans défiler. */
+@media (max-height: 56rem) and (min-width: 44.01rem) {
+    .hero { padding-block: .4rem .8rem; }
+    .hero h1 { font-size: clamp(1.4rem, 3vw, 1.9rem); }
+    .hero p { display: none; }
+    .diceFaces { height: clamp(9rem, 30vh, 30rem); }
+    .imageStage { height: clamp(9rem, 30vh, 30rem); }
+}
+
+@media (max-width: 44rem) {
+    .hero p { display: none; }
+}
+
+/* ---------- Ajustement à la fenêtre (tablette, ENI, TBI, ordinateur) ----------
+   Tout tient dans la hauteur de la fenêtre, sans défiler : la zone de résultat prend
+   la place restante, les colonnes de réglages et d'historique défilent en interne.
+   Sur une fenêtre trop basse pour le contenu minimal, la page défile comme avant. */
+@media (min-width: 44.01rem) and (min-height: 30rem) {
+    body { height: 100vh; height: 100dvh; min-height: 0; }
+    #app { min-height: 0; }
+    main.container { flex: 1 1 auto; min-height: 0; padding-block: var(--gap); }
+    .layout { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+    .layout .card { min-height: 0; }
+    /* La rangée a une hauteur fixe : l'historique s'étire simplement, sa liste défile. */
+    .layout .historyPanel { height: auto; }
+    .historyList { min-height: 0; }
+    .settingsPanel { overflow-y: auto; }
+    /* Un nom très long défile dans la carte au lieu de passer sous le bouton Lancer. */
+    .drawPanel .resultCard { flex: 1 1 0; min-height: 11rem; overflow-y: auto; }
+    #resultName { font-size: clamp(2rem, min(7vw, 11vh), 6rem); }
+    .diceFaces,
+    .imageStage,
+    #app:fullscreen .diceFaces,
+    #app.fakeFullscreen .diceFaces,
+    #app:fullscreen .imageStage,
+    #app.fakeFullscreen .imageStage { flex: 1 1 0; height: auto; min-height: 6rem; }
+    #nameList { min-height: 6rem; }
+    .footer { padding-block: .5rem; }
+    .hero { padding-block: .6rem 1rem; }
+    .hero p { display: none; }
+}
+
+/* Fenêtre peu haute (portable, TBI 1024×768) : marges resserrées pour agrandir le résultat. */
+@media (min-width: 44.01rem) and (min-height: 30rem) and (max-height: 56rem) {
+    main.container { gap: .6rem; padding-block: .6rem; }
+    .layout .card { padding: .9rem; gap: .6rem; }
+    .resultCard { padding: .6rem; gap: .4rem; }
+    .diceTotal { line-height: 1.2; }
+    .footer { padding-block: .35rem; }
+    .speedBox { padding: .4rem 1rem; }
+    .rangeLabels { display: none; }
+    .drawButton { min-height: 3.75rem; }
+    .imageCaption { font-size: clamp(1.2rem, min(4vw, 5vh), 3rem); }
+}
+
+/* ENI / TBI 1024×768 et écrans moyens assez larges : l'historique reste en 3e colonne
+   (étroite) plutôt que de prendre une rangée entière sous le résultat. */
+@media (min-width: 60rem) and (max-width: 64rem) and (min-height: 30rem) {
+    .layout { grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr) minmax(11rem, 13rem); }
+    .layout.noHistory { grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr); }
+    .historyPanel { grid-column: auto; }
+    .historyList { max-height: none; }
+}
+
+/* Historique sous les deux colonnes : une rangée de plus, liste courte. */
+@media (min-width: 44.01rem) and (max-width: 59.99rem) and (min-height: 30rem) {
+    .layout { grid-template-rows: minmax(0, 1fr) auto; }
+    /* Hauteur fixe : la liste qui se remplit ne doit pas rétrécir la zone de résultat. */
+    .historyList { height: 5.5rem; max-height: none; }
+    .historyPanel { padding-block: .6rem; gap: .3rem; }
+    .historyPanel .panelHeader h2 { font-size: 1.05rem; }
+    .hero p { display: none; }
+    .hero { padding-block: .6rem .9rem; }
+}
+
+/* Colonne de résultat étroite : durée et bouton Lancer restent sur une seule ligne. */
+@media (min-width: 44.01rem) and (max-width: 64rem) and (min-height: 30rem) {
+    .speedBox { flex-basis: 9rem; padding: .4rem .9rem; }
+    .rangeLabels { display: none; }
+    .drawButton { min-width: 0; min-height: 3.75rem; padding-inline: 1.2rem; font-size: 1.15rem; }
+}
+
+/* Paysage bas (tablette ou téléphone couché) : pas de grand titre. */
+@media (max-height: 34rem) and (orientation: landscape) {
+    .hero { display: none; }
+    .diceFaces { height: clamp(8rem, 50vh, 16rem); }
+    .imageStage { height: clamp(8rem, 50vh, 16rem); }
+}
